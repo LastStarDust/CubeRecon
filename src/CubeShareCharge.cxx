@@ -327,8 +327,15 @@ double Cube::ShareCharge::GetFastEntropy() {
     return - fastEntropy/std::sqrt(cubes)/totalDeposit;
 }
 
-double Cube::ShareCharge::GetFastEntropyDerivative(double d) {
-    double totalDeposit = GetTotalDeposit();
+double Cube::ShareCharge::GetFastEntropyDerivative(double d,
+                                                   double totalDeposit) {
+#ifdef SLOW_DOWN_PLEASE
+    double total = GetTotalDeposit();
+    if (abs(total-totalDeposit)>0.1) {
+        CUBE_ERROR << "TOTAL  " << total << " " << totalDeposit << std::endl;
+        throw std::runtime_error("Bad total deposit");
+    }
+#endif
     double cubes = fAugmentedCubes.size();
     double averageDeposit = totalDeposit/cubes;
     double deriv = - 2.0*(1.0-1.0/cubes)*(d-averageDeposit);
@@ -488,7 +495,6 @@ void Cube::ShareCharge::ApplyConstraints(Cube::HitSelection& mutableHits) {
 
 double Cube::ShareCharge::EvolveCubes(double step,
                                       std::vector<double>& grad) {
-    double totalChange = 0.0;
     double totalDeposit = GetTotalDeposit();
     double averageDeposit = totalDeposit/fAugmentedCubes.size();
     if (grad.size () != fAugmentedCubes.size()) {
@@ -514,7 +520,8 @@ double Cube::ShareCharge::EvolveCubes(double step,
         // scale so that it doesn't get lost in the noise.  This might be
         // needed due to a math error, or might just be needed.
         double eScale = 1.0*fAugmentedCubes.size();
-        double entropyDeriv = eScale*GetFastEntropyDerivative(currentDeposit);
+        double entropyDeriv = eScale*GetFastEntropyDerivative(currentDeposit,
+                                                              totalDeposit);
         double deriv = fiberDeriv - entropyDeriv;
         grad[c] = deriv;
         magGrad += deriv*deriv;
@@ -529,21 +536,22 @@ double Cube::ShareCharge::EvolveCubes(double step,
         double currentDeposit = cube.GetDeposit();
         double targetDeposit = currentDeposit + change;
         cube.SetDeposit(targetDeposit);
+#ifdef DEBUG_CHANGES
+#undef DEBUG_CHANGES
         double newDeposit = cube.GetDeposit();
         if (std::abs(targetDeposit - newDeposit) > 1E-4) {
             continue;
         }
-        totalChange += std::abs(change);
         dist += change*change;
-#ifdef DEBUG_CHANGES
-#undef DEBUG_CHANGES
         std::cout << "Optim Cube " << cube.GetDeposit()
                   << " " << grad[c]
                   << " " << change
                   << std::endl;
 #endif
     }
-    return totalChange;
+    double chi2 = GetFiberChi2();
+    double entropy = GetFastEntropy();
+    return chi2 + entropy;
 }
 
 void Cube::ShareCharge::OptimizeCubes(Cube::HitSelection& mutableHits) {
@@ -555,11 +563,11 @@ void Cube::ShareCharge::OptimizeCubes(Cube::HitSelection& mutableHits) {
     std::vector<double> grad;
     std::vector<double> oldGrad;
     double oldChi2 = -1.0;
+    double oldChange = 0.0;
     int stuck = 0;
     for (int i=0; i<1000; ++i) {
         // Take one step.
-        double totalChange = EvolveCubes(step,grad);
-        double oldChange = 0.0;
+        double chi2 = EvolveCubes(step,grad);
         double change = 0.0;
         double dotProd = 0.0;
         if (grad.size() != oldGrad.size()) {
@@ -574,32 +582,29 @@ void Cube::ShareCharge::OptimizeCubes(Cube::HitSelection& mutableHits) {
             for (int i=0; i<grad.size(); ++i) {
                 dotProd += grad[i]*oldGrad[i];
                 change += grad[i]*grad[i];
-                oldChange += oldGrad[i]*oldGrad[i];
             }
         }
         double cosGrad = dotProd/sqrt(change)/sqrt(oldChange);
-        double chi2 = GetFiberChi2();
         double deltaChi2 = chi2-oldChi2;
         ++stuck;
         if (oldChi2 < 0) deltaChi2 = -deltaChi2;
         else if (std::abs(deltaChi2) > 0.01) stuck = 0;
         oldChi2 = chi2;
         std::copy(grad.begin(),grad.end(),oldGrad.begin());
-#define DEBUG_EVOLUTION
+        oldChange = change;
 #ifdef DEBUG_EVOLUTION
 #undef DEBUG_EVOLUTION
         CUBE_LOG(0) << i
-                    << " f " << GetFiberChi2()
-                    << " (" << deltaChi2 << ")"
+                    << " f " << chi2
+                    << " (" << deltaChi2 << "," << stuck << ")"
                     << " s " << step
-                    << " d " << GetTotalDeposit()
                     << " g " << dotProd << " " << cosGrad << std::endl;
 #endif
         // This approximates a golden-section search for the minimum...
         if (stuck > 5)  break;
         else if (deltaChi2 > 0) step = step/1.618;
         else if (step < 0.05) break;
-        else if (dotProd > 0.0) step = 1.1*step; // 2.618*step/2.0;
+        else if (dotProd > 0.0) step = 1.15*step;
     };
 
     CUBE_LOG(0) << "Optimized Deposit: " << GetTotalDeposit()

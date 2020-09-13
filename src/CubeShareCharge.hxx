@@ -243,7 +243,7 @@ public:
 
     // Calculate the partial derivative of the fast entropy approximation for
     // a single deposit.
-    double GetFastEntropyDerivative(double d);
+    double GetFastEntropyDerivative(double d, double totalDeposit);
 
     // Get the likelihood for all of the fiber expected and measured charges.
     // This is the "ln(Poisson" likelihood, but using the Gaussian
