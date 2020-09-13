@@ -1,0 +1,14 @@
+# Debugging Display for CubeRecon
+
+This is a simple debugging display to help visually validate the
+output.  It's not a full (real) event display!  It's included because
+it can be very helpful for getting a handle on what is going on in an
+event, but is not a substitute for a real display.
+
+This expects a root file produced by the CubeRecon.
+
+## Running
+
+This can be run using "cube-disp <input-file>".  Or as "cube-disp -h" to
+get a list of the command line parameters.
+
