@@ -15,17 +15,21 @@ endif(ROOT_FOUND)
 set(source
   CubeERepSim.cxx
   CubeInfo.cxx CubeHitUtilities.cxx CubeClusterManagement.cxx
-  CubeMakeUsed.cxx CubeTimeSlice.cxx
-  CubeHits3D.cxx CubeShareCharge.cxx
-  CubeMakeHits3D.cxx
+  CubeCreateTrack.cxx  CubeMakeUsed.cxx
+  CubeTrackFit.cxx CubePCATrackFit.cxx CubeStochTrackFit.cxx
+  CubeTimeSlice.cxx CubeMakeHits3D.cxx CubeHits3D.cxx CubeShareCharge.cxx
+  CubeRecon.cxx CubeTreeRecon.cxx CubeClusterHits.cxx CubeSpanningTree.cxx
+  CubeFindKinks.cxx CubeGrowClusters.cxx CubeGrowTracks.cxx 
   )
 
 set(includes
   CubeERepSim.hxx
-  CubeInfo.hxx CubeHitUtilities.hxx CubeClusterManagement.cxx
-  CubeMakeUsed.hxx CubeTimeSlice.hxx
-  CubeHits3D.hxx CubeShareCharge.hxx
-  CubeMakeHits3D.hxx
+  CubeInfo.hxx CubeHitUtilities.hxx  CubeClusterManagement.hxx
+  CubeSafeLine.hxx CubeCreateTrack.hxx CubeMakeUsed.hxx
+  CubeTrackFit.hxx CubePCATrackFit.hxx CubeStochTrackFit.hxx
+  CubeTimeSlice.hxx CubeMakeHits3D.hxx CubeHits3D.hxx CubeShareCharge.hxx
+  CubeRecon.hxx CubeTreeRecon.hxx CubeClusterHits.hxx CubeSpanningTree.hxx
+  CubeFindKinks.hxx CubeGrowClusters.hxx CubeGrowTracks.hxx 
   )
 
 # Make sure the current directories are available for the later

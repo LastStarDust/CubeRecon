@@ -27,8 +27,8 @@ Cube::TimeSlice::~TimeSlice() { }
 
 Cube::Handle<Cube::AlgorithmResult>
 Cube::TimeSlice::Process(const Cube::AlgorithmResult& in,
-        const Cube::AlgorithmResult&,
-        const Cube::AlgorithmResult&) {
+                         const Cube::AlgorithmResult&,
+                         const Cube::AlgorithmResult&) {
     CUBE_LOG(0) << "TimeSlice::Process" << std::endl;
 
     // Get the hits and check that they exist.

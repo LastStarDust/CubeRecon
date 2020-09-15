@@ -213,7 +213,7 @@ protected:
 
 /// A macro that adds the direction property to a state.  The direction state
 /// is defined as a three vector (dX,dY,dZ) and the associated uncertainties.
-/// The corelations between the components are enforced in the covariance
+/// The correlations between the components are enforced in the covariance
 /// matrix.
 #define DIRECTION_STATE_DECLARATION                                     \
     public:                                                             \
@@ -305,7 +305,7 @@ protected:
     public:                                                             \
     /** Get the size of the mass field */                               \
     int GetMassSize() const {return 1;}                                 \
-    /** Get the index of the mass field in the CorrValues vector.*/    \
+    /** Get the index of the mass field in the CorrValues vector.*/     \
     int GetMassIndex() const {return fMassIndex;}                       \
     /** Get the value of the mass. */                                   \
     double GetMass() const {return GetValue(fMassIndex);}               \
@@ -326,6 +326,66 @@ protected:
     fMassIndex=fFieldNames.size();                                  \
     fFieldNames.push_back("Mass")
 
+/// A macro that adds the curvature property to a state.  The curvature state
+/// is defined as a three vector (cX,cY,cZ) and the associated uncertainties.
+/// The correlations between the components are enforced in the covariance
+/// matrix.
+#define CURVATURE_STATE_DECLARATION                                     \
+    public:                                                             \
+    /** Get the size of the direction field */                          \
+    int GetCurvatureSize() const {return 3;}                            \
+    /** Get the index of the direction field.*/                         \
+    int GetCurvatureIndex() const {return fCurvatureIndex;}             \
+    /** Get the value of the direction. */                              \
+    TVector3 GetCurvature() const {                                     \
+        return TVector3(GetValue(fCurvatureIndex+0),                    \
+                        GetValue(fCurvatureIndex+1),                    \
+                        GetValue(fCurvatureIndex+2));                   \
+    }                                                                   \
+    /** Set the value of the direction.*/                               \
+    void SetCurvature(double x, double y, double z) {                   \
+        SetValue(fCurvatureIndex+0,x);                                  \
+        SetValue(fCurvatureIndex+1,y);                                  \
+        SetValue(fCurvatureIndex+2,z);                                  \
+    }                                                                   \
+    /** Set the value of the direction.*/                               \
+    void SetCurvature(const TVector3& curv) {                           \
+        SetCurvature(curv.X(),curv.Y(),curv.Z());                       \
+    }                                                                   \
+    /** Set the covariance of the direction variables.  The indices */  \
+    /* run from 0 to 2 (0: dX, 1: dY, 2: dZ).*/                         \
+    void SetCurvatureCovariance(int i, int j, double v) {               \
+        SetCovarianceValue(fCurvatureIndex+i,fCurvatureIndex+j,v);      \
+    }                                                                   \
+    /** Get the covariance of the direction variables.  The indices */  \
+    /* run from 0 to 2 (0: dX, 1: dY, 2: dZ).*/                         \
+    double GetCurvatureCovariance(int i, int j) const {                 \
+        return GetCovarianceValue(fCurvatureIndex+i,fCurvatureIndex+j); \
+    }                                                                   \
+    /** Get the variance of the Curvature.*/                            \
+    TVector3 GetCurvatureVariance(void) const {                         \
+        return TVector3(                                                \
+            GetCurvatureCovariance(0,0),                                \
+            GetCurvatureCovariance(1,1),                                \
+            GetCurvatureCovariance(2,2));                               \
+    }                                                                   \
+    /** Set the variance of the Curvature.*/                            \
+    void SetCurvatureVariance(double x, double y, double z) {           \
+        SetCurvatureCovariance(0,0,x);                                  \
+        SetCurvatureCovariance(1,1,y);                                  \
+        SetCurvatureCovariance(2,2,z);                                  \
+    }
+
+#define CURVATURE_STATE_PRIVATE                 \
+    private: unsigned char fCurvatureIndex
+
+/// This should be included in the class constructor.
+#define CURVATURE_STATE_DEFINITION                                      \
+    fCurvatureIndex=fFieldNames.size();                                 \
+    fFieldNames.push_back("curvX");                                     \
+    fFieldNames.push_back("curvY");                                     \
+    fFieldNames.push_back("curvZ")
+
 /// A macro that adds the width of a curvilinear energy deposit property to a
 /// state.  The width is the extent of an energy deposition perpendicular to
 /// local direction and the associated uncertainties.
@@ -333,7 +393,7 @@ protected:
     public:                                                             \
     /** Get the size of the Position field */                           \
     int GetWidthSize() const {return 1;}                                \
-    /** Get the index of the width field in the TCorrValuest vector.*/   \
+    /** Get the index of the width field in the TCorrValuest vector.*/  \
     int GetWidthIndex() const {return fWidthIndex;}                     \
     /** Get the value of the width. */                                  \
     double GetWidth() const {return GetValue(fWidthIndex);}             \
@@ -408,3 +468,9 @@ protected:
     fFieldNames.push_back("Charge")
 
 #endif
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

@@ -15,12 +15,12 @@ namespace Cube {
 /// A representation of a curvilinear energy deposit starting a position, and
 /// following a path.  This is described by the amount of energy deposited by
 /// the entire track, the initial position , the initial time, the initial
-/// direction, the estimated mass, and the initial path width.  There must be
-/// a way to represent the path of the energy deposition between the initial
-/// and final ends of the deposition.  At each intermediate point, we require
-/// a representation of the energy deposit (dEdX), position, time, direction,
-/// estimated mass, and width.  The detector hits are associated with each
-/// node along the track.
+/// direction, the estimated curvature, and the initial path width.  There
+/// must be a way to represent the path of the energy deposition between the
+/// initial and final ends of the deposition.  At each intermediate point, we
+/// require a representation of the energy deposit (dEdX), position, time,
+/// direction, curvature, and width.  The detector hits are associated
+/// with each node along the track.
 ///
 /// The Cube::ReconTrack class is intended to describe the geometry of the
 /// energy deposition in a detector, and not make the association with a
@@ -83,10 +83,8 @@ public:
     /// Get the track direction.
     TVector3 GetDirection() const;
 
-    /// Get the track mass.  The mass is not limited to the mass of a "known"
-    /// particle, but represents a fitted value based on dEdX, or other
-    /// measured properties.
-    double GetMass() const;
+    /// Get the track curvature.
+    TVector3 GetCurvature() const;
 
     /// Get the width of the track.
     double GetWidth() const;
@@ -105,3 +103,9 @@ private:
     ClassDef(ReconTrack,2);
 };
 #endif
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

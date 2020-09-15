@@ -7,24 +7,20 @@
 #include <algorithm>
 
 
-    template <typename T>
-    struct decreasingClusterSize :
-        public std::binary_function <T, T, bool > {
-        bool operator() (const T& lhs, const T& rhs) {
-            return lhs.size() > rhs.size();
-        }
-    };
-    
-
-
-
+template <typename T>
+struct decreasingClusterSize :
+    public std::binary_function <T, T, bool > {
+    bool operator() (const T& lhs, const T& rhs) {
+        return lhs.size() > rhs.size();
+    }
+};
 
 template <typename T, typename MetricModel>
 /// For a detailed description of the density-based clustering, Google keyword:
 /// density-based clustering, or DBSCAN.  The first template argument provides
 /// the class type for the elements that will be clustered, and the second
 /// provides is a functor which calculates a distance metric between two
-/// elements.  
+/// elements.
 ///
 /// Algorithm Reference
 /// @INPROCEEDINGS{Ester96:dbscan,
@@ -53,7 +49,7 @@ template <typename T, typename MetricModel>
 ///    }
 /// };
 /// \endcode
-/// 
+///
 /// Example: Template class for clustering hits using position the distance in
 /// the P0D X/Y plane is:
 /// \code
@@ -65,12 +61,12 @@ template <typename T, typename MetricModel>
 ///        double y1 = 0.0;
 ///        if (lhs->IsXHit()) y1 = lhs->GetPosition().X();
 ///        if (lhs->IsYHit()) y1 = lhs->GetPosition().Y();
-///        
+///
 ///        double x2 = rhs->GetPosition().Z();
 ///        double y2 = 0.0;
 ///        if (rhs->IsXHit()) y2 = rhs->GetPosition().X();
 ///        if (rhs->IsYHit()) y2 = rhs->GetPosition().Y();
-///        
+///
 ///        return std::sqrt(pow(x1-x2, 2) + pow(y1-y2, 2));
 ///    }
 /// };
@@ -79,13 +75,13 @@ template <typename T, typename MetricModel>
 /// \code
 ///    // Work around template parsing bug in some GCC versions...
 ///    typedef CP::THandle<CP::THit> Arg;
-///   
+///
 ///    // Make a typedef for the ClusterAlgorithm.
 ///    typedef TTmplDensityCluster<Arg, SpatialDistance<Arg> > ClusterAlgorithm;
 ///
 ///    const double maxDist = 20*unit::cm;
 ///    const unsigned int minPoints = 4;
-///    
+///
 ///    std::unique_ptr<ClusterAlgorithm>
 ///        xcluster(new ClusterAlgorithm(minPoints, maxDist));
 ///    xcluster->Cluster(xHits);
@@ -135,7 +131,7 @@ template <typename T, typename MetricModel>
 /// Example: Sometimes you will have a metric model that takes arguments in
 /// the constructor.  An example of this might be a clustering where the X, Y
 /// and Z dimensions are included in the metric using different scale factors
-/// such as 
+/// such as
 /// \code
 /// class ScaledMetric {
 /// private:
@@ -189,7 +185,7 @@ public:
     /// A constant iterator to move through the Points collection (mostly for
     /// internal use).
     typedef typename Points::const_iterator ConstIterator;
-    
+
     /// Create a density clustering class that requires at least minPts within
     /// a distance of maxDist.  The distance is defined by the return value of
     /// the MetricModel::operator() method (for example, TimeDistance or
@@ -204,15 +200,15 @@ public:
     /// SpacialDistance described in the class documentation).  This form
     /// takes an explicitly constructed MetricModel class, so that code can
     /// pass arguments to the MetricModel constructor.
-    explicit TTmplDensityCluster(unsigned int minPts, 
-                                 double maxDist, 
+    explicit TTmplDensityCluster(unsigned int minPts,
+                                 double maxDist,
                                  MetricModel metric);
     virtual ~TTmplDensityCluster() {}
 
     /// Cluster a vector of objects.  The results are accessed using
     /// GetCluster().
     void Cluster(const std::vector<T>&);
-    
+
     /// Cluster a group of objects between the begin and end iterator.  The
     /// results are accessed using GetCluster().
     template <typename InputIterator>
@@ -227,9 +223,9 @@ public:
     /// then the return value will be the list of unclustered points.
     const Points& GetCluster(unsigned int i) const {
         if (i == fClusters.size()) return fRemainingPoints;
-        return fClusters.at(i); 
+        return fClusters.at(i);
     }
-    
+
     /// A convenient member that returns the points in a cluster.  This is a
     /// relatively expensive method since the points are returned as a vector
     /// (by value).  If the index is greater than the number of found clusters,
@@ -239,7 +235,7 @@ public:
     /// Validate that the all of the points are either part of a cluster, or
     /// part of the unclustered points.
     void Check();
-     
+
 protected:
     /// Find the set of points with highest density in input.  If the density
     /// is greater that fMinPoints, then return the set of points in output.
@@ -256,7 +252,7 @@ protected:
     /// GetNeighbors is that the neighboring points are not returned by
     /// CountNeighbors.
     std::size_t CountNeighbors(T point, const Points& input);
-    
+
     /// Remove the seeds from the inputs.  This changes the seeds since they
     /// are sorted as part of the algorithm.  The inputs must already be
     /// sorted.
@@ -277,7 +273,7 @@ private:
 
     /// A class that calculates the distance between points.  The MetricModel
     /// class must define (at least) an method equivalent to "double
-    /// operator() (T lhs, T rhs)".  Examples of possible operators are 
+    /// operator() (T lhs, T rhs)".  Examples of possible operators are
     /// \code
     /// double operator() (T lhs, T rhs);
     /// double operator() (const T& lhs, const T& rhs);
@@ -310,7 +306,7 @@ TTmplDensityCluster<T, MetricModel>::TTmplDensityCluster(unsigned int MinPts,
     fMinPoints(MinPts),
     fMaxDist(maxDist),
     fMetricModel(MetricModel()) { }
-  
+
 template <typename T, typename MetricModel>
 void TTmplDensityCluster<T, MetricModel>::Cluster(const std::vector<T>& pnts) {
     Cluster(pnts.begin(), pnts.end());
@@ -318,7 +314,7 @@ void TTmplDensityCluster<T, MetricModel>::Cluster(const std::vector<T>& pnts) {
 
 template <typename T, typename MetricModel>
 template <typename InputIterator>
-void TTmplDensityCluster<T, MetricModel>::Cluster(InputIterator begin, 
+void TTmplDensityCluster<T, MetricModel>::Cluster(InputIterator begin,
                                                   InputIterator end) {
     Points seeds;
 
@@ -364,7 +360,7 @@ void TTmplDensityCluster<T, MetricModel>::Cluster(InputIterator begin,
     std::sort(fClusters.begin(), fClusters.end(),
               decreasingClusterSize<Points>());
 }
-    
+
 template <typename T, typename MetricModel>
 void TTmplDensityCluster<T, MetricModel>::Check() {
     typedef typename std::vector<Points>::const_iterator Iterator;
@@ -375,10 +371,10 @@ void TTmplDensityCluster<T, MetricModel>::Check() {
     }
 
     std::size_t totalPointCount = clusterPointCount + fRemainingPoints.size();
-      
+
 }
 
-    
+
 template <typename T, typename MetricModel>
 void TTmplDensityCluster<T, MetricModel>::FindSeeds(
     const Points& in, Points& out) {
@@ -387,10 +383,10 @@ void TTmplDensityCluster<T, MetricModel>::FindSeeds(
     int seedsFound = 0;
     for (ConstIterator h = in.begin(); h != in.end(); ++h) {
         seeds.clear();
-        std::size_t i = GetNeighbors(*h, in, seeds); 
+        std::size_t i = GetNeighbors(*h, in, seeds);
         i += 1;                 // Include the current point in the count.
         if (i < fMinPoints) continue;
-        if (out.size() < i) { 
+        if (out.size() < i) {
             ++seedsFound;       // Count the number of "largest" seeds found.
             out = seeds;        // Copy the points in the seed to output
             out.push_back(*h);  // Add the starting hit to the output.

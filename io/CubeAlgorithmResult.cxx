@@ -72,7 +72,8 @@ Cube::AlgorithmResult::GetAlgorithmResult(const char* name) const {
     if (!name) return fResultsContainer.back();
     std::string searchName(name);
     if (searchName.empty()) return fResultsContainer.back();
-    for (Container::const_reverse_iterator s = fResultsContainer.rbegin();
+    for (AlgorithmResults::const_reverse_iterator s
+             = fResultsContainer.rbegin();
          s != fResultsContainer.rend(); ++s) {
         std::string nm((*s)->GetName());
         if (nm == searchName) return *s;
@@ -94,7 +95,7 @@ Cube::AlgorithmResult::GetObjectContainer(
     }
     if (!name) return fObjectContainers.back();
     std::string searchName(name);
-    for (ObjectContainers::const_reverse_iterator s
+    for (ReconObjects::const_reverse_iterator s
              = fObjectContainers.rbegin();
          s != fObjectContainers.rend(); ++s) {
         std::string nm((*s)->GetName());

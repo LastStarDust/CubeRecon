@@ -8,7 +8,7 @@ Cube::TrackState::TrackState() {
     ENERGY_DEPOSIT_STATE_DEFINITION;
     POSITION_STATE_DEFINITION;
     DIRECTION_STATE_DEFINITION;
-    MASS_STATE_DEFINITION;
+    CURVATURE_STATE_DEFINITION;
     WIDTH_STATE_DEFINITION;
 
     Init();
@@ -22,7 +22,7 @@ Cube::TrackState::TrackState(const Cube::TrackState& init)
     ENERGY_DEPOSIT_STATE_DEFINITION;
     POSITION_STATE_DEFINITION;
     DIRECTION_STATE_DEFINITION;
-    MASS_STATE_DEFINITION;
+    CURVATURE_STATE_DEFINITION;
     WIDTH_STATE_DEFINITION;
 
     Init();
@@ -54,3 +54,9 @@ Cube::TrackState& Cube::TrackState::operator=(const Cube::TrackState& rhs) {
 
     return *this;
 }
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

@@ -21,16 +21,21 @@ public:
     ENERGY_DEPOSIT_STATE_DECLARATION;
     POSITION_STATE_DECLARATION;
     DIRECTION_STATE_DECLARATION;
-    MASS_STATE_DECLARATION;
+    CURVATURE_STATE_DECLARATION;
     WIDTH_STATE_DECLARATION;
 
     ENERGY_DEPOSIT_STATE_PRIVATE;
     POSITION_STATE_PRIVATE;
     DIRECTION_STATE_PRIVATE;
-    MASS_STATE_PRIVATE;
+    CURVATURE_STATE_PRIVATE;
     WIDTH_STATE_PRIVATE;
 
     ClassDef(TrackState,1);
 };
-
 #endif
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

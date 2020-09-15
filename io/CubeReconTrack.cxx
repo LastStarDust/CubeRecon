@@ -108,11 +108,11 @@ TVector3 Cube::ReconTrack::GetDirection() const {
     return state->GetDirection();
 }
 
-double Cube::ReconTrack::GetMass() const {
+TVector3 Cube::ReconTrack::GetCurvature() const {
     // This is the preferred way to access a state field.
     Cube::Handle<Cube::TrackState> state = GetState();
     if (!state) throw std::runtime_error("Track state messing");
-    return state->GetMass();
+    return state->GetCurvature();
 }
 
 double Cube::ReconTrack::GetWidth() const {
@@ -172,3 +172,9 @@ void Cube::ReconTrack::ls(Option_t *opt) const {
 
     TROOT::DecreaseDirLevel();
 }
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

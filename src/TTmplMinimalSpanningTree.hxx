@@ -169,7 +169,7 @@ class TTmplMinimalSpanningTree {
 public:
     TTmplMinimalSpanningTree() {};
     virtual ~TTmplMinimalSpanningTree() {};
-    
+
     /// A class to hold each vertex in the tree.  The object holds several
     /// fields that are useful for the user and which are publicly exposed.
     /// This is available to the user as an element in a constant vector
@@ -178,46 +178,46 @@ public:
     public:
         /// The object at this vertex.
         T Object;
-        
+
         /// Some extra data the user might attach the vertex.  This defaults to
         /// being an integer, but could be any type.  It's set to mutable so it
         /// can be modified even when the tree is constant.
         mutable UserDataType UserData;
-        
+
         /// The index in the MinimalSpanningTree of the parent of this vertex.
         /// If the vertex is the root of the tree, this will have a value of
         /// negative one.
         int Parent;
-        
+
         typedef std::vector<std::size_t> Child;
-        
+
         /// The indicies in the MinimalSpanningTree of the children of this
         /// vertex
         Child Children;
-        
+
         /// The number of vertices between this vertex and the root.  The root
         /// has a VertexDepth of zero, the children of the root have a
         /// VertexDepth of one.
         int VertexDepth;
-        
+
         /// The sum of the edge weights between this vertex and the root.
         /// The root has a EdgeSum of zero.
         double EdgeSum;
-        
+
         /// The weight of the edge from this vertex to the parent.  The root
         /// has a ParentEdge of zero.
         double ParentEdge;
     };
-    
+
     typedef std::vector<TreeVertex> MinimalSpanningTree;
-    
+
     /// Reinitialize the class.  This clears all of the internal data
     /// structures.
     void Clear() {
         fVertices.clear();
         fTree.clear();
     }
-    
+
     /// Add a container worth of vertices to be built into an MST.  This
     /// supports any container with a forward or backward iterator.  The
     /// object referenced by the iterator must be convertible to correct
@@ -231,35 +231,35 @@ public:
         }
         if (!fTree.empty()) fTree.clear();
     }
-    
+
     /// Add a single vertex to be built into an MST.  This can be used in
     /// conjunction with the AddVertices method.  If the class contains an
     /// existing MST, it will be cleared.
-    void AddVertex(T vertex) {
+    void AddVertex(const T& vertex) {
         fVertices.push_back(vertex);
         if (!fTree.empty()) fTree.clear();
     }
-    
+
     /// Build a MST from the existing vertices.  The root vertex will be
     /// chosen to be the object that is closest to the input rootVertex.
-    void MakeTree(T& rootVertex) {
+    void MakeTree(const T& rootVertex) {
         // Make sure the fTree is empty, and then reserve enough space so that
         // pushes are "cheap".
         fTree.clear();
         fTree.reserve(fVertices.size());
-        
+
         // An iterator to memorize the closest vertex that has been found.
         // It's reused several times.  It's initialized with an invalid value.
         VertexIterator closest = fVertices.end();
-        
+
         // The edge weight associated with the closest vertex.  It's
         // initialized with an invalid value.
         double minimumEdge = -1.0;
-        
+
         // A tree vertex that used to build a new vertex before pushing it
         // onto the tree.
         TreeVertex tv;
-        
+
         // Find the first vertex for the tree.  This will be the closest
         // vertex to the rootVertex.  Normally that will be the rootVertex,
         // but the provided rootVertex doesn't have to exist in the set of
@@ -279,7 +279,7 @@ public:
         tv.ParentEdge = 0.0;
         fTree.push_back(tv);
         fVertices.erase(closest);
-        
+
         // Run the simplest version of Prim's algorithm.  This keeps adding
         // verticies until there aren't any more.  Nota Bene: This is an n^2
         // implementation!
@@ -308,17 +308,17 @@ public:
             fVertices.erase(closest);
         }
     }
-    
+
     /// Return a constant reference to the MST.
     const MinimalSpanningTree& GetTree() {
         return fTree;
     }
-    
+
 private:
-    
+
     typedef std::list<T> VertexList;
     typedef typename VertexList::iterator VertexIterator;
-    
+
     /// A class that calculates the distance between points.  The EdgeWeight
     /// class must define (at least) an method equivalent to "double
     /// operator() (T lhs, T rhs)".  Examples of possible operators are
@@ -327,11 +327,11 @@ private:
     /// double operator() (const T& lhs, const T& rhs);
     /// \endcode
     EdgeWeight fEdgeWeight;
-    
+
     /// The internal tree that is constructed.  It is exposed to the user by
     /// GetTree();
     MinimalSpanningTree fTree;
-    
+
     // An internal field that tracks the vertices that still need to be
     // attached.
     VertexList fVertices;
@@ -369,16 +369,16 @@ int main(int argc, char**argv) {
         {3, 4, 2},  {3, 5, 2},  {3, 6, 2},
         {0, 1, 1}, {1, 0, 2}
     };
-    
+
     typedef TTmplMinimalSpanningTree<pixel,pixelDist,double> VtxMST;
     VtxMST mst;
-    
+
     mst.AddVertices(&vtx[0], &vtx[11]);
-    
+
     mst.MakeTree(vtx[0]);
-    
+
     const VtxMST::MinimalSpanningTree& tree = mst.GetTree();
-    
+
     for (int i = 0; i < tree.size(); ++i) {
         tree[i].UserData = 0.1*i; // Check the user data is mutable
         std::cout << i
@@ -399,7 +399,7 @@ int main(int argc, char**argv) {
         }
         std::cout << std::endl;
     }
-    
+
     return 0;
 }
 #endif

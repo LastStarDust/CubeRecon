@@ -50,8 +50,8 @@ namespace Cube {
 /// for it's input.
 class Cube::AlgorithmResult : public TNamed {
 public:
-    typedef std::vector<Cube::Handle<Cube::AlgorithmResult>> Container;
-    typedef std::vector<Cube::Handle<Cube::ReconObjectContainer>> ObjectContainers;
+    typedef std::vector<Cube::Handle<Cube::AlgorithmResult>> AlgorithmResults;
+    typedef std::vector<Cube::Handle<Cube::ReconObjectContainer>> ReconObjects;
     typedef std::vector<Cube::Handle<Cube::HitSelection>> HitSelections;
 
     AlgorithmResult();
@@ -124,9 +124,9 @@ public:
 
     /// Get the container of ReconObjectContainer objects. This is exposing
     /// some class internals, so you should usually prefer GetObjectContainer().
-    const ObjectContainers& GetObjectContainers() const {
+    const ReconObjects& GetObjectContainers() const {
         return fObjectContainers;}
-    ObjectContainers& GetObjectContainers() {return fObjectContainers;}
+    ReconObjects& GetObjectContainers() {return fObjectContainers;}
 
     /// Add a new hit selection into the AlgorithmResult.  Note that the hit
     /// selection name must be unique in this result.  Also, the hit selection
@@ -154,8 +154,10 @@ public:
 
     /// Get the container of children.  This is exposing some class internals,
     /// so you should prefer GetAlgorithmResult().
-    const Container& GetResultsContainer() const {return fResultsContainer;}
-    Container& GetResultsContainer() {return fResultsContainer;}
+    const AlgorithmResults& GetResultsContainer() const {
+        return fResultsContainer;
+    }
+    AlgorithmResults& GetResultsContainer() {return fResultsContainer;}
 
     /// Print the result information.
     virtual void ls(Option_t *opt = "") const;
@@ -179,10 +181,10 @@ protected:
     std::string fStatusSummary;
 
     /// A container of sub-algorithm results
-    Container fResultsContainer;
+    AlgorithmResults fResultsContainer;
 
     /// A container of reconstruction object containers.
-    ObjectContainers fObjectContainers;
+    ReconObjects fObjectContainers;
 
     /// A container of hit selections.
     HitSelections fHitSelections;

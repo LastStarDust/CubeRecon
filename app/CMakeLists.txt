@@ -14,3 +14,8 @@ install(TARGETS cubeERepTranslate RUNTIME DESTINATION bin)
 add_executable(cubeMakeHits3D cubeMakeHits3D.cxx)
 target_link_libraries(cubeMakeHits3D LINK_PUBLIC cuberecon)
 install(TARGETS cubeMakeHits3D RUNTIME DESTINATION bin)
+
+# Add a program to run the reconstruction.
+add_executable(cubeRecon cubeRecon.cxx)
+target_link_libraries(cubeRecon LINK_PUBLIC cuberecon)
+install(TARGETS cubeRecon RUNTIME DESTINATION bin)
