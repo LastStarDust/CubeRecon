@@ -26,8 +26,8 @@ Cube::TMatrixElement::TMatrixElement(const char* name,
 }
 
 void Cube::TMatrixElement::Initialize(const TVector3& position,
-                                    const TMatrixD& matrix,
-                                    bool longAxis) {
+                                      const TMatrixD& matrix,
+                                      bool longAxis) {
     // Find the rotation of the object to be displayed.  If longAxis is true,
     // the the matrix is represented as a tube with the long axis along the
     // local Z direction, and the major and minor in the XY plane.  Otherwise,
@@ -37,6 +37,10 @@ void Cube::TMatrixElement::Initialize(const TVector3& position,
     for (int i=0; i<3; ++i) {
         for (int j=0; j<3; ++j) {
             tubeRot(i,j) = matrix(i,j);
+            if (!std::isfinite(matrix(i,j))) {
+                fValid = false;
+                return;
+            }
         }
     }
 
@@ -45,6 +49,21 @@ void Cube::TMatrixElement::Initialize(const TVector3& position,
     double tubeMinor;
     TVectorD values(3);
     TMatrixD tubeEigen(tubeRot.EigenVectors(values));
+
+    // Check that the eigenvalues are real.
+    for (int i=0; i<3; ++i) {
+        if (!std::isfinite(values(i))) {
+            fValid = false;
+            return;
+        }
+        for (int j=0; j<3; ++j) {
+            if (!std::isfinite(tubeEigen(i,j))) {
+                fValid = false;
+                return;
+            }
+        }
+    }
+
     if (longAxis) {
         tubeAxis = std::sqrt(values(0));
         tubeRot(0,2) = tubeEigen(0,0);
@@ -101,3 +120,9 @@ void Cube::TMatrixElement::Initialize(const TVector3& position,
     SetShape(geoShape);
     gGeoManager = saveGeom;
 }
+
+// Local Variables:
+// mode:c++
+// c-basic-offset:4
+// compile-command:"$(git rev-parse --show-toplevel)/build/cube-build.sh force"
+// End:

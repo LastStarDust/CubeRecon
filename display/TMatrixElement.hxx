@@ -30,9 +30,14 @@ public:
                    bool longAxis);
     virtual ~TMatrixElement();
 
+    // Returns true if the matrix element was properly constructed.
+    bool Valid() {return fValid;}
+
 private:
     void Initialize(const TVector3& position,
                     const TMatrixD& matrix,
                     bool longAxis);
+
+    bool fValid;
 };
 #endif

@@ -32,23 +32,25 @@ endif(ROOT_Eve_LIBRARY)
 if (EDEPSIM_LIBRARY)
   set(show_edepsim_source TG4HitChangeHandler.cxx TTrajectoryChangeHandler.cxx)
   set(show_edepsim_includesTTrajectoryChangeHandler.hxx)
-
 endif (EDEPSIM_LIBRARY)
 
 # Define the source and include files that should be used for the display.
 set(source
   TEventDisplay.cxx TEventChangeManager.cxx TGUIManager.cxx
-  TMatrixElement.cxx
   TShowHits.cxx THitChangeHandler.cxx
-  TG4HitChangeHandler.cxx
+  TG4HitChangeHandler.cxx TFitChangeHandler.cxx TFindResultsHandler.cxx
+  TMatrixElement.cxx TReconClusterElement.cxx TReconTrackElement.cxx
+  TReconShowerElement.cxx
   ${show_edepsim_source}
   )
 
 set(includes
   TEventDisplay.hxx TEventChangeManager.hxx TGUIManager.hxx
-  TMatrixElement.hxx TRecurseGeoManager.hxx
+  TRecurseGeoManager.hxx
   TShowHits.hxx THitChangeHandler.hxx
-  TG4HitChangeHandler.hxx
+  TG4HitChangeHandler.hxx TFitChangeHandler.hxx TFindResultsHandler.hxx
+  TMatrixElement.hxx  TReconClusterElement.hxx TReconTrackElement.hxx
+  TReconShowerElement.hxx
   ${show_edepsim_includes}
   )
 

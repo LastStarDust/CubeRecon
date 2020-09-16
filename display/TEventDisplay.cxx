@@ -4,6 +4,8 @@
 #include "TTrajectoryChangeHandler.hxx"
 #include "TG4HitChangeHandler.hxx"
 #include "THitChangeHandler.hxx"
+#include "TFindResultsHandler.hxx"
+#include "TFitChangeHandler.hxx"
 
 
 #include <TEveManager.h>
@@ -40,9 +42,11 @@ void Cube::TEventDisplay::Init() {
     // Create the event display manager.  This needs the GUI, so it has to be
     // done after TGUIManager is created.
     fEventChangeManager = new TEventChangeManager();
+    fEventChangeManager->AddUpdateHandler(new TFindResultsHandler());
     // fEventChangeManager->AddUpdateHandler(new TTrajectoryChangeHandler());
     fEventChangeManager->AddUpdateHandler(new TG4HitChangeHandler());
     fEventChangeManager->AddUpdateHandler(new THitChangeHandler());
+    fEventChangeManager->AddUpdateHandler(new TFitChangeHandler());
 
     // Create the color palette.  This is split into two halves.  The first
     // half is from dark to white and is used for negative values on the

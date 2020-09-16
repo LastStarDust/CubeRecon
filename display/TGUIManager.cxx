@@ -131,13 +131,117 @@ void Cube::TGUIManager::MakeControlTab() {
     checkButton = new TGCheckButton(hf,"Select composite hits");
     checkButton->SetToolTipText(
         "Select composite hits to be drawn.");
+    checkButton->SetOn();
     checkButton->SetTextJustify(36);
     checkButton->SetMargins(0,0,0,0);
     checkButton->SetWrapLength(-1);
     hf->AddFrame(checkButton, layoutHints);
     fShowCompHitsButton = checkButton;
 
+    //////////////////////////////////////////////////////
+    // Control how fits are drawn
+    //////////////////////////////////////////////////////
+    checkButton = new TGCheckButton(hf,"Show reconstruction objects");
+    checkButton->SetToolTipText(
+        "Show the reconstruction objects in the selected container.");
+    checkButton->SetOn();
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowFitsButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Skip reconstructed tracks.");
+    checkButton->SetToolTipText(
+        "Skip any tracks in the reconstructed objects.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fSkipFitTracksButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Skip reconstructed clusters.");
+    checkButton->SetToolTipText(
+        "Skip any clusters in the reconstructed objects.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fSkipFitClustersButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Show reconstruction object hits");
+    checkButton->SetToolTipText(
+        "Show the hits in the reconstruction objects.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowFitHitsButton = checkButton;
+
+    //////////////////////////////////////////////////////////////////
+    // Control how clusters are drawn
+    //////////////////////////////////////////////////////////////////
+    checkButton = new TGCheckButton(hf,"Connect first and last cluster hit.");
+    checkButton->SetToolTipText(
+        "Draw a line connecting the first and last hit in the clusters.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowFitEndsButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Show connections in clusters.");
+    checkButton->SetToolTipText(
+        "Show the order of hits in the clusters.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowClusterConnectionsButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Show cluster position uncertainty.");
+    checkButton->SetToolTipText(
+        "Show cluster centroid uncertainty, not the cluster size.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowClusterUncertaintyButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Show cluster hits.");
+    checkButton->SetToolTipText(
+        "Show cluster hits (almost the same as showing all hits.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowClusterHitsButton = checkButton;
+
+    //////////////////////////////////////////////////////////////////
+    // Control how tracks and showers are drawn
+    //////////////////////////////////////////////////////////////////
+    checkButton = new TGCheckButton(hf,"Show object directions.");
+    checkButton->SetToolTipText(
+        "Show the directions of tracks and nodes.");
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowFitDirectionButton = checkButton;
+
+    checkButton = new TGCheckButton(hf,"Show object constiuents.");
+    checkButton->SetToolTipText(
+        "Show the nodes for tracks and showers.");
+    checkButton->SetOn();
+    checkButton->SetTextJustify(36);
+    checkButton->SetMargins(0,0,0,0);
+    checkButton->SetWrapLength(-1);
+    hf->AddFrame(checkButton, layoutHints);
+    fShowConstituentClustersButton = checkButton;
+
+    /////////////////////////////////////////////////////////////
     // Do the final layout and mapping.
+    /////////////////////////////////////////////////////////////
     mainFrame->AddFrame(hf, layoutHints);
     mainFrame->MapSubwindows();
     mainFrame->Resize();
@@ -178,7 +282,7 @@ void Cube::TGUIManager::MakeResultsTab() {
     // the default default result.  It should be possible to override this
     // from the command line!
     fDefaultResult = new TGTextEntry(hf);
-    fDefaultResult->SetText("TCaptainRecon/final");
+    fDefaultResult->SetText("CubeEvent/final");
     fDefaultResult->SetToolTipText(
         "Enter a regular expression to select algorithm results\n"
         "to be shown.  The usual regexp syntax applys:\n"
