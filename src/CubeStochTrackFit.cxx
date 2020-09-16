@@ -46,7 +46,7 @@ namespace {
         kCurvY = 9,
         kCurvZ = 10,
         kWidth = 11,
-        kSampleSize = 13,
+        kSampleSize = 12,
     };
 
     /// A user likelihood for the SimpleSIR template.
@@ -647,7 +647,9 @@ namespace {
              s != samples.end(); ++s) {
             s->first = 1.0/samples.size();
             if (s->second.size() != kSampleSize) {
-                CUBE_ERROR << "Sample size is wrong.  Problem someplace" << std::endl;
+                CUBE_ERROR << "Sample size is wrong.  Problem someplace"
+                           << " " << s->second.size()
+                           << " vs " << kSampleSize << std::endl;
                 throw std::runtime_error("Bad sample size");
             }
             int m1 = (int) gRandom->Uniform(0.0, mSize);
