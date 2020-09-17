@@ -159,12 +159,19 @@ Cube::PCATrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
         }
     }
 
-    // Fill the overall track state.
-    Cube::Handle<Cube::TrackState> inputState = input->GetState();
-    Cube::Handle<Cube::TrackState> firstNodeState = nodes.front()->GetState();
-    *inputState = *firstNodeState;
-    inputState->SetEDeposit(energyDeposit);
-    inputState->SetEDepositVariance(energyVariance);
+    // Fill the overall track state at the front
+    Cube::Handle<Cube::TrackState> trackState = input->GetState();
+    Cube::Handle<Cube::TrackState> nodeState = nodes.front()->GetState();
+    *trackState = *nodeState;
+    trackState->SetEDeposit(energyDeposit);
+    trackState->SetEDepositVariance(energyVariance);
+
+    // Fill the overall track state at the back
+    trackState = input->GetBack();
+    nodeState = nodes.back()->GetState();
+    *trackState = *nodeState;
+    trackState->SetEDeposit(energyDeposit);
+    trackState->SetEDepositVariance(energyVariance);
 
     // Setup the track information and status fields.
     int trackDOF = 3*nodes.size() - 6;

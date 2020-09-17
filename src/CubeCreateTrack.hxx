@@ -247,8 +247,17 @@ Cube::CreateTrackFromClusters(const char* name,
         state->SetEDepositVariance(0.04*charge*charge);
     }
 
-    Cube::Handle<Cube::TrackState> trackState = track->GetState();
+    // Set the total track state at the front of the track.
+    Cube::Handle<Cube::TrackState> trackState = track->GetFront();
     Cube::Handle<Cube::TrackState> nodeState = nodes.front()->GetState();
+    *trackState = *nodeState;
+
+    trackState->SetEDeposit(totalCharge);
+    trackState->SetEDepositVariance(0.04*totalCharge*totalCharge);
+
+    // Set the total track state at the back of the track.
+    trackState = track->GetBack();
+    nodeState = nodes.back()->GetState();
     *trackState = *nodeState;
 
     trackState->SetEDeposit(totalCharge);
