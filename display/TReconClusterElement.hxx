@@ -13,7 +13,9 @@ namespace Cube {
 /// A Eve Element object to represent a Cube::ReconCluster.
 class Cube::TReconClusterElement: public TEveElementList {
 public:
-    TReconClusterElement(Cube::ReconCluster& cluster, bool showUncertainty);
+    TReconClusterElement(Cube::ReconCluster& cluster,
+                         bool showUncertainty,
+                         bool printInfo = false);
     virtual ~TReconClusterElement();
 
     bool Valid() {return fValid;}

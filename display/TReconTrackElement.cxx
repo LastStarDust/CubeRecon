@@ -112,8 +112,9 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
     std::cout << "track:: " << title.str() << std::endl;
 
     Cube::ReconNodeContainer& nodes = track.GetNodes();
+#ifdef PRINT_NODES
     std::cout << "nodes:: " << "Track Nodes " << nodes.size()<<std::endl;
-
+#endif
     std::ostringstream objName;
     objName << track.GetName() << "(" << track.GetUniqueID() << ")";
 
@@ -157,6 +158,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
             trackLine->SetPoint(p++, frontPos.X(), frontPos.Y(), frontPos.Z());
         }
         else fValid = false;
+#ifdef REALLY_NOISY
         std::cout << "nodes::" << "Front:"
                   << unit::AsString(frontPos.X(),
                                     std::sqrt(frontVar.X()),"length")
@@ -169,6 +171,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   << "Front Dir: "
                   << unit::AsString(frontState->GetDirection())
                   << std::endl;
+#endif
     }
 
     for (Cube::ReconNodeContainer::iterator n = nodes.begin();
@@ -186,6 +189,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
         else {
             fValid = false;
         }
+#ifdef REALLY_NOISY
         std::cout << "nodes"
                   << "Pos:"
                   << unit::AsString(nodePos.X(),
@@ -195,18 +199,23 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   <<", "<<unit::AsString(nodePos.Z(),
                                          std::sqrt(nodeVar.Z()),"length")
                   << std::endl;
+#endif
         Cube::Handle<Cube::ReconCluster> cluster = nodeObject;
         if (cluster) {
             double delta = (cluster->GetPosition().Vect()-nodePos.Vect()).Mag();
+#ifdef REALLY_NOISY
             std::cout << "nodes::" << "Cluster: "
                       << unit::AsString(cluster->GetPosition().Vect(),
                                         "length")
                       << "  diff: " << unit::AsString(delta,"length")
                       << std::endl;
+#endif
         }
+#ifdef REALLY_NOISY
         std::cout << "nodes::"
                   << "Dir: " << unit::AsString(nodeState->GetDirection())
                   << std::endl;
+#endif
     }
 
 #ifdef USE_BACKSTATE
@@ -222,6 +231,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
         else {
             fValid = false;
         }
+#ifdef REALLY_NOISY
         std::cout << "nodes::" << "Back:"
                   << unit::AsString(backPos.X(),
                                     std::sqrt(backVar.X()),"length")
@@ -234,6 +244,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   << "Back Dir: "
                   << unit::AsString(backState->GetDirection())
                   << std::endl;
+#endif
     }
 #endif
     AddElement(trackLine.release());

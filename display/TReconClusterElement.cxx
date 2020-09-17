@@ -19,7 +19,8 @@
 Cube::TReconClusterElement::~TReconClusterElement() {}
 
 Cube::TReconClusterElement::TReconClusterElement(Cube::ReconCluster& cluster,
-                                                 bool showUncertainty)
+                                                 bool showUncertainty,
+                                                 bool printInfo)
     : TEveElementList(), fValid(true) {
 
     double minEnergy = 10.0;
@@ -28,16 +29,21 @@ Cube::TReconClusterElement::TReconClusterElement(Cube::ReconCluster& cluster,
     Cube::Handle<Cube::ClusterState> state = cluster.GetState();
     TLorentzVector var = state->GetPositionVariance();
     TLorentzVector pos = state->GetPosition();
-    std::cout << "Cluster(" << cluster.GetUniqueID() << ") @ "
-              << unit::AsString(pos.X(),std::sqrt(var.X()),"length")
-              << ", " << unit::AsString(pos.Y(),std::sqrt(var.Y()),"length")
-              << ", " << unit::AsString(pos.Z(),std::sqrt(var.Z()),"length")
-              << std::endl;
+    if (printInfo) {
+        std::cout << "Cluster(" << cluster.GetUniqueID() << ") @ "
+                  << unit::AsString(pos.X(),std::sqrt(var.X()),"length")
+                  << ", "
+                  << unit::AsString(pos.Y(),std::sqrt(var.Y()),"length")
+                  << ", "
+                  << unit::AsString(pos.Z(),std::sqrt(var.Z()),"length")
+                  << std::endl;
 
-    std::cout << "  Time " << unit::AsString(pos.T(),std::sqrt(var.T()),"time")
-              << "  Charge " << unit::AsString(cluster.GetEDeposit(),"pe")
-              << std::endl;
-
+        std::cout << "  Time "
+                  << unit::AsString(pos.T(),std::sqrt(var.T()),"time")
+                  << "  Charge "
+                  << unit::AsString(cluster.GetEDeposit(),"pe")
+                  << std::endl;
+    }
     // Find the rotation of the object to be displayed.  A cluster is
     // represented as a tube with the long axis along the local Z direction,
     // and the major and minor in the XY plane.
