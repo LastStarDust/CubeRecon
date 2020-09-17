@@ -118,7 +118,9 @@ public:
 
     /// Get a reconstruction object container out of this AlgorithmResult.
     /// The most recently added object container that matchs the requested
-    /// name will be returned.
+    /// name will be returned. This can be used to look for objects in
+    /// sub-results by treating the name like a file system hierarchy
+    /// (e.g. "algo1/subalgo1/subalgo2/objectName").
     Cube::Handle<Cube::ReconObjectContainer>
     GetObjectContainer(const char* object=NULL) const;
 
@@ -148,7 +150,9 @@ public:
     void AddAlgorithmResult(Cube::Handle<Cube::AlgorithmResult> result);
 
     /// Get a sub AlgorithmResult.  The most recently added algorithm result
-    /// that matchs the requested name will be returned.
+    /// that matchs the requested name will be returned.  This can be used to
+    /// look for sub-results by treating the name like a file system
+    /// hierarchy (e.g. "algo1/subalgo1/subalgo2").
     Cube::Handle<Cube::AlgorithmResult>
     GetAlgorithmResult(const char* result=NULL) const;
 

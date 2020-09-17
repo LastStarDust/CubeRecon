@@ -69,15 +69,32 @@ Cube::AlgorithmResult::GetAlgorithmResult(const char* name) const {
     if (fResultsContainer.empty()) {
         return Cube::Handle<Cube::AlgorithmResult>();
     }
-    if (!name) return fResultsContainer.back();
+    if (!name) {
+        return fResultsContainer.back();
+    }
     std::string searchName(name);
-    if (searchName.empty()) return fResultsContainer.back();
+    std::size_t slash = searchName.find("/");
+    std::string topName = searchName.substr(0,slash);
+    // Check if topName is the current object and handle it as a special case.
+    if (topName == std::string(GetName())) {
+        // Check if we need to look deeper.
+        if (slash == std::string::npos) return fResultsContainer.back();
+        // There is more to the name, so look deeper.
+        std::string backName = searchName.substr(slash+1);
+        return GetAlgorithmResult(backName.c_str());
+    }
+    // Look for "topName" in the current result.  Start at the back of the
+    // vector to find the most recent version first.
     for (AlgorithmResults::const_reverse_iterator s
              = fResultsContainer.rbegin();
          s != fResultsContainer.rend(); ++s) {
-        std::string nm((*s)->GetName());
-        if (nm == searchName) return *s;
+        if (std::string(GetName()) != topName) continue;
+        // Found it, now check to see if we need to look inside "topName"
+        if (slash == std::string::npos) return *s;
+        std::string backName = searchName.substr(slash+1);
+        return (*s)->GetAlgorithmResult(backName.c_str());
     }
+    // Oops, nothing found!
     return Cube::Handle<Cube::AlgorithmResult>();
 }
 
@@ -93,17 +110,34 @@ Cube::AlgorithmResult::GetObjectContainer(
     if (fObjectContainers.empty()) {
         return Cube::Handle<Cube::ReconObjectContainer>();
     }
-    if (!name) return fObjectContainers.back();
+    if (!name) {
+        return fObjectContainers.back();
+    }
     std::string searchName(name);
+    std::size_t slash = searchName.rfind("/");
+    if (slash != std::string::npos) {
+        std::string algoName = searchName.substr(0,slash);
+        std::string objectsName = searchName.substr(slash+1);
+        if (algoName == std::string(GetName())) {
+            return GetObjectContainer(objectsName.c_str());
+        }
+        Cube::Handle<Cube::AlgorithmResult> result
+            = GetAlgorithmResult(algoName.c_str());
+        if (!result) {
+            return Cube::Handle<Cube::ReconObjectContainer>();
+        }
+        return result->GetObjectContainer(objectsName.c_str());
+    }
     for (ReconObjects::const_reverse_iterator s
              = fObjectContainers.rbegin();
          s != fObjectContainers.rend(); ++s) {
         std::string nm((*s)->GetName());
-        if (nm == searchName) return *s;
+        if (nm == searchName) {
+            return *s;
+        }
     }
     return Cube::Handle<Cube::ReconObjectContainer>();
 }
-
 
 void Cube::AlgorithmResult::AddHitSelection(
     Cube::Handle<Cube::HitSelection> hits) {
