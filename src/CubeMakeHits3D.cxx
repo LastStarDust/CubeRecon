@@ -12,7 +12,7 @@
 #include <memory>
 
 Cube::MakeHits3D::MakeHits3D()
-    : Cube::Algorithm("Cube::MakeHits3D","Build 2D hits into 3D hits") {
+    : Cube::Algorithm("MakeHits3D","Build 2D hits into 3D hits") {
 }
 
 Cube::MakeHits3D::~MakeHits3D() {

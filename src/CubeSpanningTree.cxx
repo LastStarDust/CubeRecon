@@ -50,7 +50,7 @@ namespace {
 }
 
 Cube::SpanningTree::SpanningTree()
-    : Cube::Algorithm("Cube::SpanningTree") {
+    : Cube::Algorithm("SpanningTree") {
 
     fDistanceType = 0;
     fGhostHitThreshold = 9.5;

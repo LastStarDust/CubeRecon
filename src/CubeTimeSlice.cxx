@@ -19,7 +19,7 @@ namespace {
 };
 
 Cube::TimeSlice::TimeSlice()
-    : Cube::Algorithm("Cube::TimeSlice") {
+    : Cube::Algorithm("TimeSlice") {
     fGapCut = 40.0 * unit::ns;
 }
 

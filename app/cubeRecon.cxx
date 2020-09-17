@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
         // This will leave the 3D hits as the main hit selection for the
         // event.
         Cube::Handle<Cube::AlgorithmResult> makeHits3D
-            = outputEvent->GetAlgorithmResult("Cube::MakeHits3D");
+            = outputEvent->GetAlgorithmResult("MakeHits3D");
         if (!makeHits3D) {
             std::unique_ptr<Cube::MakeHits3D>
                 algoMakeHits3D(new Cube::MakeHits3D);

@@ -18,7 +18,7 @@
 #include <cmath>
 
 Cube::GrowTracks::GrowTracks()
-    : Cube::Algorithm("Cube::GrowTracks",
+    : Cube::Algorithm("GrowTracks",
                  "Merge tracks that are end-to-end") {
     fMergeDistanceCut = 50.0*unit::mm;
     // = Cube::TOARuntimeParams::Get().GetParameterD(

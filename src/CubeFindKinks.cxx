@@ -11,7 +11,7 @@
 #include <list>
 
 Cube::FindKinks::FindKinks()
-    : Cube::Algorithm("Cube::FindKinks") {
+    : Cube::Algorithm("FindKinks") {
 
     fScanLength = 7;
 

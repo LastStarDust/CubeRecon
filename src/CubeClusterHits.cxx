@@ -32,7 +32,7 @@ namespace {
 }
 
 Cube::ClusterHits::ClusterHits()
-    : Cube::Algorithm("Cube::ClusterHits") {
+    : Cube::Algorithm("ClusterHits") {
     // We need simply connected hits, so this isn't actually tunable, but can
     // be overridden with the setters
     fCubeNeighborhood = 1;
