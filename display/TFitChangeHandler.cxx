@@ -90,32 +90,21 @@ void Cube::TFitChangeHandler::Apply() {
         ->GetSelectedEntries(&selected);
 
     int index = 0;
-#ifdef ITERATE_SELECTED
+
     // Iterate through the list of selected entries.
     TIter next(&selected);
     TGLBEntry* lbEntry;
     while ((lbEntry = (TGLBEntry*) next())) {
         std::string objName(lbEntry->GetTitle());
-        CUBE_ERROR << "Get entry" << std::endl;
-        // Cube::Handle<Cube::ReconObjectContainer> objects
-        // = gEvent->GetObjectContainer(objName.c_str());
+        CUBE_ERROR << "Get entry " << objName << std::endl;
         Cube::Handle<Cube::ReconObjectContainer> objects
-            = gEvent->GetObjectContainer();
+            = gEvent->GetObjectContainer(objName.c_str());
         if (!objects) {
             CUBE_ERROR << "No objects" << std::endl;
             continue;
         }
         index = ShowReconObjects(fFitList,objects,index);
     }
-#else
-    CUBE_ERROR << "Get objects" << std::endl;
-    Cube::Handle<Cube::ReconObjectContainer> objects
-        = gEvent->GetObjectContainer();
-    if (objects) {
-        CUBE_ERROR << "show objects" << std::endl;
-        index = ShowReconObjects(fFitList,objects,index);
-    }
-#endif
 
 #ifdef SETUP_CAMERA
     if (fCameraWeight > 1

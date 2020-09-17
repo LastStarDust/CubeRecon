@@ -3,6 +3,11 @@
 
 #include "TVEventChangeHandler.hxx"
 
+#include <CubeAlgorithmResult.hxx>
+#include <CubeHandle.hxx>
+
+#include <string>
+
 namespace Cube {
     class TFindResultsHandler;
 };
@@ -18,6 +23,12 @@ public:
 
     /// Draw fit information into the current scene.
     virtual void Apply();
+
+private:
+
+    void FillEntries(std::vector<std::string>& entries,
+                     std::string baseName,
+                     Cube::Handle<Cube::AlgorithmResult> current);
 
 };
 #endif
