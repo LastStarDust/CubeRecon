@@ -85,6 +85,9 @@ int main(int argc, char **argv) {
         outputEvent = inputEvent;
         outputEvent->MakeCurrentEvent();
 
+        CUBE_LOG(0) << "Process event " << outputEvent->GetRunId()
+                    << "/" << outputEvent->GetEventId() << std::endl;
+
         // Check if MakeHits3D has been run.  If it is missing, then run it.
         // This will leave the 3D hits as the main hit selection for the
         // event.
@@ -114,6 +117,9 @@ int main(int argc, char **argv) {
             if (finalObjects) outputEvent->AddObjectContainer(finalObjects);
         }
 
+
+        CUBE_LOG(0) << "Finished event " << outputEvent->GetRunId()
+                    << "/" << outputEvent->GetEventId() << std::endl;
         outputTree->Fill();
     }
 
