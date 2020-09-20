@@ -28,7 +28,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
 
     Cube::Handle<Cube::TrackState> frontState = track.GetState();
     if (!frontState) {
-        std::cout << "TrackState missing!" << std::endl;
+        CUBE_ERROR << "TrackState missing!" << std::endl;
         fValid = false;
         return;
     }
@@ -54,13 +54,14 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
         TVector3 dvar = frontState->GetDirectionVariance();
 
         double length = GetLength(track);
-        double dEdX = -1.0;
+        double dEdX = 0.0;
         if (length > 0) {
             dEdX = track.GetEDeposit()/length;
         }
         title << "Track(" << track.GetUniqueID() << ") --"
               << " Nodes: " << track.GetNodes().size()
               << " Hits: " << track.GetHitSelection()->size()
+              << " Length: " << unit::AsString(length,"length")
               << std::endl
               << "   Energy Deposit: "
               << unit::AsString(track.GetEDeposit(),"pe")
@@ -109,12 +110,10 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
     }
 #endif
 
-    std::cout << "track:: " << title.str() << std::endl;
+    CUBE_LOG(0) << "track:: " << title.str() << std::endl;
 
     Cube::ReconNodeContainer& nodes = track.GetNodes();
-#ifdef PRINT_NODES
-    std::cout << "nodes:: " << "Track Nodes " << nodes.size()<<std::endl;
-#endif
+
     std::ostringstream objName;
     objName << track.GetName() << "(" << track.GetUniqueID() << ")";
 
@@ -133,7 +132,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
     trackLine->SetTitle(title.str().c_str());
     trackLine->SetSourceObject(&track);
     trackLine->SetLineStyle(1);
-    trackLine->SetLineWidth(2);
+    trackLine->SetLineWidth(4);
 
     int color = kBlue;
     if (GetLength(track) > 0.5*unit::mm) {
@@ -158,8 +157,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
             trackLine->SetPoint(p++, frontPos.X(), frontPos.Y(), frontPos.Z());
         }
         else fValid = false;
-#ifdef REALLY_NOISY
-        std::cout << "nodes::" << "Front:"
+        CUBE_DEBUG(2) << "nodes::" << "Front:"
                   << unit::AsString(frontPos.X(),
                                     std::sqrt(frontVar.X()),"length")
                   <<", "<<unit::AsString(frontPos.Y(),
@@ -167,11 +165,10 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   <<", "<<unit::AsString(frontPos.Z(),
                                          std::sqrt(frontVar.Z()),"length")
                   << std::endl;
-        std::cout << "nodes"
+        CUBE_DEBUG(2) << "nodes"
                   << "Front Dir: "
                   << unit::AsString(frontState->GetDirection())
                   << std::endl;
-#endif
     }
 
     for (Cube::ReconNodeContainer::iterator n = nodes.begin();
@@ -189,8 +186,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
         else {
             fValid = false;
         }
-#ifdef REALLY_NOISY
-        std::cout << "nodes"
+        CUBE_DEBUG(2) << "nodes"
                   << "Pos:"
                   << unit::AsString(nodePos.X(),
                                     std::sqrt(nodeVar.X()),"length")
@@ -199,23 +195,18 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   <<", "<<unit::AsString(nodePos.Z(),
                                          std::sqrt(nodeVar.Z()),"length")
                   << std::endl;
-#endif
         Cube::Handle<Cube::ReconCluster> cluster = nodeObject;
         if (cluster) {
             double delta = (cluster->GetPosition().Vect()-nodePos.Vect()).Mag();
-#ifdef REALLY_NOISY
-            std::cout << "nodes::" << "Cluster: "
+            CUBE_DEBUG(2) << "nodes::" << "Cluster: "
                       << unit::AsString(cluster->GetPosition().Vect(),
                                         "length")
                       << "  diff: " << unit::AsString(delta,"length")
                       << std::endl;
-#endif
         }
-#ifdef REALLY_NOISY
-        std::cout << "nodes::"
+        CUBE_DEBUG(2) << "nodes::"
                   << "Dir: " << unit::AsString(nodeState->GetDirection())
                   << std::endl;
-#endif
     }
 
 #ifdef USE_BACKSTATE
@@ -231,8 +222,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
         else {
             fValid = false;
         }
-#ifdef REALLY_NOISY
-        std::cout << "nodes::" << "Back:"
+        CUBE_DEBUG(2) << "nodes::" << "Back:"
                   << unit::AsString(backPos.X(),
                                     std::sqrt(backVar.X()),"length")
                   <<", "<<unit::AsString(backPos.Y(),
@@ -240,11 +230,10 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
                   <<", "<<unit::AsString(backPos.Z(),
                                          std::sqrt(backVar.Z()),"length")
                   << std::endl;
-        std::cout << "nodes::"
+        CUBE_DEBUG(2) << "nodes::"
                   << "Back Dir: "
                   << unit::AsString(backState->GetDirection())
                   << std::endl;
-#endif
     }
 #endif
     AddElement(trackLine.release());
@@ -281,7 +270,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
             Cube::Handle<Cube::TrackState> nodeState = (*n)->GetState();
             Cube::Handle<Cube::ReconObject> nodeObject = (*n)->GetObject();
             if (!nodeState) {
-                std::cout << "Node state is missing" << std::endl;
+                CUBE_ERROR << "Node state is missing" << std::endl;
                 continue;
             }
 
@@ -394,7 +383,7 @@ Cube::TReconTrackElement::TReconTrackElement(Cube::ReconTrack& track,
              n != nodes.end(); ++n) {
             Cube::Handle<Cube::TrackState> nodeState = (*n)->GetState();
             if (!nodeState) {
-                std::cout << "Node state is missing" << std::endl;
+                CUBE_ERROR << "Node state is missing" << std::endl;
                 continue;
             }
             TLorentzVector nodePos = nodeState->GetPosition();

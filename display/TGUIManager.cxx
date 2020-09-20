@@ -231,8 +231,7 @@ void Cube::TGUIManager::MakeControlTab() {
 
     checkButton = new TGCheckButton(hf,"Show object constiuents.");
     checkButton->SetToolTipText(
-        "Show the nodes for tracks and showers.");
-    checkButton->SetOn();
+        "Show the node objects for tracks and showers.");
     checkButton->SetTextJustify(36);
     checkButton->SetMargins(0,0,0,0);
     checkButton->SetWrapLength(-1);
