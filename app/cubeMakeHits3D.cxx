@@ -5,6 +5,7 @@
 #include <TTree.h>
 #include <TVector3.h>
 #include <TVector.h>
+#include <TH1F.h>
 
 #include <iostream>
 #include <sstream>
@@ -68,6 +69,9 @@ int main(int argc, char **argv) {
     static Cube::Event *outputEvent = inputEvent;
     outputTree->Branch("Event",&outputEvent);
 
+    TH1F* hitCharge = new TH1F("hitCharge", "Charge of the hits",
+                               500, 0.0, 500.0);
+
     // Loop through the events.
     int totalEntries = inputTree->GetEntries();
     totalEntries = std::min(totalEntries,maxEntries);
@@ -75,6 +79,8 @@ int main(int argc, char **argv) {
         inputTree->GetEntry(entry);
         outputEvent = inputEvent;
         outputEvent->MakeCurrentEvent();
+        CUBE_LOG(0) << "Process event " << outputEvent->GetRunId()
+                    << "/" << outputEvent->GetEventId() << std::endl;
 
         std::unique_ptr<Cube::MakeHits3D> makeHits3D(new Cube::MakeHits3D);
         Cube::Handle<Cube::AlgorithmResult> hits3D
@@ -82,15 +88,19 @@ int main(int argc, char **argv) {
         outputEvent->AddAlgorithmResult(hits3D);
         outputEvent->AddHitSelection(hits3D->GetHitSelection());
 
-        outputEvent->ls("quiet");
         Cube::Handle<Cube::HitSelection> finalHits
             = outputEvent->GetHitSelection();
         if (finalHits) {
             TROOT::IndentLevel();
             CUBE_LOG(0) << "Final hits " << finalHits->size()
                         << std::endl;
+            for (Cube::Handle<Cube::Hit>& h : (*finalHits)) {
+                hitCharge->Fill(h->GetCharge());
+            }
         }
 
+        CUBE_LOG(0) << "Finished event " << outputEvent->GetRunId()
+                    << "/" << outputEvent->GetEventId() << std::endl;
         outputTree->Fill();
     }
 
