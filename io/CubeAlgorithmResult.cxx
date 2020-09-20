@@ -88,7 +88,7 @@ Cube::AlgorithmResult::GetAlgorithmResult(const char* name) const {
     for (AlgorithmResults::const_reverse_iterator s
              = fResultsContainer.rbegin();
          s != fResultsContainer.rend(); ++s) {
-        if (std::string(GetName()) != topName) continue;
+        if (std::string((*s)->GetName()) != topName) continue;
         // Found it, now check to see if we need to look inside "topName"
         if (slash == std::string::npos) return *s;
         std::string backName = searchName.substr(slash+1);
