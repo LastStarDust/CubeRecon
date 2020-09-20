@@ -19,7 +19,7 @@ set(source
   CubeTrackFit.cxx CubePCATrackFit.cxx CubeStochTrackFit.cxx
   CubeTimeSlice.cxx CubeMakeHits3D.cxx CubeHits3D.cxx CubeShareCharge.cxx
   CubeRecon.cxx CubeTreeRecon.cxx CubeClusterHits.cxx CubeSpanningTree.cxx
-  CubeFindKinks.cxx CubeGrowClusters.cxx CubeGrowTracks.cxx 
+  CubeFindKinks.cxx CubeGrowClusters.cxx CubeGrowTracks.cxx CubeMergeXTalk.cxx
   )
 
 set(includes
@@ -29,7 +29,7 @@ set(includes
   CubeTrackFit.hxx CubePCATrackFit.hxx CubeStochTrackFit.hxx
   CubeTimeSlice.hxx CubeMakeHits3D.hxx CubeHits3D.hxx CubeShareCharge.hxx
   CubeRecon.hxx CubeTreeRecon.hxx CubeClusterHits.hxx CubeSpanningTree.hxx
-  CubeFindKinks.hxx CubeGrowClusters.hxx CubeGrowTracks.hxx 
+  CubeFindKinks.hxx CubeGrowClusters.hxx CubeGrowTracks.hxx  CubeMergeXTalk.hxx
   )
 
 # Make sure the current directories are available for the later
