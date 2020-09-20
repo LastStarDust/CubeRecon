@@ -5,13 +5,7 @@
 #include "CubeFindKinks.hxx"
 #include "CubeGrowClusters.hxx"
 #include "CubeGrowTracks.hxx"
-
-#ifdef NOT_YET_CONVERTED
-// This class depends on a bunch of support routines in ND::TSFGGeom, so it's
-// going to require more thought to convert.  It is suppose to merge
-// cross-talk hits that are next to a track with the track.
-#include "TSFGMergeXTalk.hxx"
-#endif
+#include "CubeMergeXTalk.hxx"
 
 #include <CubeLog.hxx>
 #include <CubeHandle.hxx>
@@ -83,14 +77,12 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
         currentResult = growTracks;
         result->AddAlgorithmResult(currentResult);
 
-#ifdef NOT_YET_CONVERTED
         // Grow the tracks to prevent gaps.
         Cube::Handle<Cube::AlgorithmResult> mergeXTalk
             = Run<Cube::MergeXTalk>(*currentResult);
         if (!mergeXTalk) break;
         currentResult = mergeXTalk;
         result->AddAlgorithmResult(currentResult);
-#endif
 
     } while (false);            // Always stops...
 
