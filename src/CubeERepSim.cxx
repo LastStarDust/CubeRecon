@@ -43,6 +43,22 @@ void Cube::ConvertERepSim(Cube::Event& event) {
     double reflect
         = (*ERepSim::Input::Get().Property)["3DST.Response.Atten.Reflect"];
 
+    std::cout << "3DST with " << countX
+              << " x " << countY
+              << " x " << countZ
+              << " cubes"
+              << std::endl;
+    std::cout << "     Pitch is " << pitchX
+              << " x " << pitchY
+              << " x " << pitchZ
+              << " mm"
+              << std::endl;
+    std::cout << "     Attenuation is "
+              << atten1 << " mm (" << ratio12 << ")"
+              << ", plus " << atten2 << " mm (" << 1.0-ratio12 << ")"
+              << " and reflectivity of " << reflect
+              << std::endl;
+
     int xzHits = 0;
     int yzHits = 0;
     int xyHits = 0;
