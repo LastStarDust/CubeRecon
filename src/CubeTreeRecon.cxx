@@ -11,6 +11,13 @@
 #include <CubeHandle.hxx>
 #include <CubeAlgorithmResult.hxx>
 
+#define EXPLORE_RUN_TIME
+#ifdef EXPLORE_RUN_TIME
+#include <time.h>
+#include <TH2F.h>
+TH2F* bogo_treeReconTime = NULL;
+#endif
+
 Cube::TreeRecon::TreeRecon(): Cube::Algorithm("TreeRecon") { }
 
 Cube::Handle<Cube::AlgorithmResult>
@@ -19,6 +26,11 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
                         const Cube::AlgorithmResult&) {
     CUBE_LOG(0) << "Process TreeRecon" << std::endl;
     Cube::Handle<Cube::HitSelection> inputHits = input.GetHitSelection();
+
+#ifdef EXPLORE_RUN_TIME
+    double ticks;
+    ticks = clock();
+#endif
 
     // Create the result for this algorithm.
     Cube::Handle<Cube::AlgorithmResult> result = CreateResult();
@@ -55,6 +67,16 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
         if (!spanningTree) break;
         currentResult = spanningTree;
         result->AddAlgorithmResult(currentResult);
+
+        // Check if there are clusters in the spanning tree unprocessed
+        // container.  If there are, then copy then straight to the final
+        // container.
+        Cube::Handle<Cube::ReconObjectContainer> unprocessed
+            = currentResult->GetObjectContainer("unprocessed");
+        if (unprocessed) {
+            std::copy(unprocessed->begin(), unprocessed->end(),
+                      std::back_inserter(*finalObjects));
+        }
 
         // Further break the clusters based on kinks.
         Cube::Handle<Cube::AlgorithmResult> findKinks
@@ -102,6 +124,28 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
     // Build the selections of used and unused hits.
     Cube::MakeUsed makeUsed(*inputHits);
     result = makeUsed(result);
+
+#ifdef EXPLORE_RUN_TIME
+    double newTicks = clock();
+    newTicks -= ticks;
+    newTicks /= 1000000.0;
+    if (newTicks < 0) newTicks += 72.0*60.0;
+    std::cout << "**************** TICKS " << newTicks << std::endl;
+    if (!bogo_treeReconTime) {
+        std::cout << "MAKE HISTOGRAM BOGO_TREERECONTIME" << std::endl;
+        bogo_treeReconTime = new TH2F("treeReconTime", "Time vs Hits",
+                                      100, 0.0, std::log10(20000.0),
+                                      100, 0.0, std::log10(10000));
+    }
+    double hitCount = inputHits->size();
+    std::cout << hitCount << " " << newTicks << std::endl;
+    if (hitCount < 1) hitCount = 1;
+    if (newTicks < 1) newTicks = 1;
+    hitCount = std::log10(hitCount);
+    newTicks = std::log10(newTicks);
+    if (newTicks < 0.01) newTicks = 0.01;
+    bogo_treeReconTime->Fill(hitCount,newTicks);
+#endif
 
     return result;
 }
