@@ -18,7 +18,8 @@ set(source
   CubeCreateTrack.cxx  CubeMakeUsed.cxx
   CubeTrackFit.cxx CubePCATrackFit.cxx CubeStochTrackFit.cxx
   CubeTimeSlice.cxx CubeMakeHits3D.cxx CubeHits3D.cxx CubeShareCharge.cxx
-  CubeRecon.cxx CubeTreeRecon.cxx CubeClusterHits.cxx CubeSpanningTree.cxx
+  CubeRecon.cxx CubeCleanHits.cxx CubeClusterHits.cxx
+  CubeTreeRecon.cxx CubeSpanningTree.cxx
   CubeFindKinks.cxx CubeGrowClusters.cxx CubeGrowTracks.cxx CubeMergeXTalk.cxx
   )
 
@@ -28,7 +29,8 @@ set(includes
   CubeSafeLine.hxx CubeCreateTrack.hxx CubeMakeUsed.hxx
   CubeTrackFit.hxx CubePCATrackFit.hxx CubeStochTrackFit.hxx
   CubeTimeSlice.hxx CubeMakeHits3D.hxx CubeHits3D.hxx CubeShareCharge.hxx
-  CubeRecon.hxx CubeTreeRecon.hxx CubeClusterHits.hxx CubeSpanningTree.hxx
+  CubeRecon.hxx CubeCleanHits.hxx CubeTreeRecon.hxx
+  CubeClusterHits.hxx CubeSpanningTree.hxx
   CubeFindKinks.hxx CubeGrowClusters.hxx CubeGrowTracks.hxx  CubeMergeXTalk.hxx
   )
 

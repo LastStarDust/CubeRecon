@@ -1,16 +1,21 @@
 #include "CubeRecon.hxx"
+#include "CubeCleanHits.hxx"
 #include "CubeTimeSlice.hxx"
 #include "CubeTreeRecon.hxx"
 #include "CubeMakeUsed.hxx"
+#include "CubeClusterManagement.hxx"
 
 #include <CubeLog.hxx>
 #include <CubeHandle.hxx>
+#include <CubeReconCluster.hxx>
 #include <CubeAlgorithmResult.hxx>
 
 #include <sstream>
 #include <iomanip>
 
-Cube::Recon::Recon(): Cube::Algorithm("CubeRecon") { }
+Cube::Recon::Recon(): Cube::Algorithm("CubeRecon") {
+    fOversizeCut = 7500;
+}
 
 Cube::Handle<Cube::AlgorithmResult>
 Cube::Recon::Process(const Cube::AlgorithmResult& input,
@@ -32,9 +37,15 @@ Cube::Recon::Process(const Cube::AlgorithmResult& input,
         return result;
     }
 
+    // Clean out junk hits.
+    Cube::Handle<Cube::AlgorithmResult> cleanHits
+        = Run<Cube::CleanHits>(*inputHits);
+    if (!cleanHits) return Cube::Handle<Cube::AlgorithmResult>();
+    result->AddAlgorithmResult(cleanHits);
+
     // Slice the event up by time.
     Cube::Handle<Cube::AlgorithmResult> timeSlice
-        = Run<Cube::TimeSlice>(*inputHits);
+        = Run<Cube::TimeSlice>(*cleanHits);
     if (!timeSlice) return Cube::Handle<Cube::AlgorithmResult>();
     result->AddAlgorithmResult(timeSlice);
 
@@ -53,6 +64,16 @@ Cube::Recon::Process(const Cube::AlgorithmResult& input,
             CUBE_ERROR << "No hits is slice" << std::endl;
             continue;
         }
+
+        // Protect against really large time slices.
+        if (hits->size() > fOversizeCut) {
+            Cube::Handle<Cube::ReconCluster> cluster
+                = Cube::CreateCluster("cubeReconLarge",
+                                      hits->begin(), hits->end());
+            finalObjects->push_back(cluster);
+            continue;
+        }
+
         // We need to make a local copy to allow the HitSelection to be
         // translated into a AlgorithmResult.
         Cube::HitSelection local("cubes");
