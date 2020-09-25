@@ -69,8 +69,13 @@ int main(int argc, char **argv) {
     static Cube::Event *outputEvent = inputEvent;
     outputTree->Branch("Event",&outputEvent);
 
+    double maxCount = 20000.0;
     TH1F* hitCharge = new TH1F("hitCharge", "Charge of the hits",
                                500, 0.0, 500.0);
+    TH1F* hitCount =  new TH1F("hitCount", "Log10(hits per slice)",
+                               100, 2.0, log10(maxCount));
+    TH1F* hitMaxCount =  new TH1F("hitMaxCount", "Log10(hits in max slice)",
+                               100, 2.0, log10(maxCount));
 
     // Loop through the events.
     int totalEntries = inputTree->GetEntries();
@@ -82,22 +87,47 @@ int main(int argc, char **argv) {
         CUBE_LOG(0) << "Process event " << outputEvent->GetRunId()
                     << "/" << outputEvent->GetEventId() << std::endl;
 
-        std::unique_ptr<Cube::MakeHits3D> makeHits3D(new Cube::MakeHits3D);
-        Cube::Handle<Cube::AlgorithmResult> hits3D
-            = makeHits3D->Process(*outputEvent);
-        outputEvent->AddAlgorithmResult(hits3D);
-        outputEvent->AddHitSelection(hits3D->GetHitSelection());
+        do {
+            Cube::Handle<Cube::AlgorithmResult> hits3D
+                = outputEvent->GetAlgorithmResult("MakeHits3D");
+            if (!hits3D) {
+                std::unique_ptr<Cube::MakeHits3D>
+                    makeHits3D(new Cube::MakeHits3D);
+                hits3D = makeHits3D->Process(*outputEvent);
+            }
+            if (!hits3D) break;
 
-        Cube::Handle<Cube::HitSelection> finalHits
-            = outputEvent->GetHitSelection();
-        if (finalHits) {
+            outputEvent->AddAlgorithmResult(hits3D);
+            outputEvent->AddHitSelection(hits3D->GetHitSelection());
+
+            Cube::Handle<Cube::HitSelection> finalHits
+                = outputEvent->GetHitSelection();
+            if (!finalHits) break;
+
+            Cube::Handle<Cube::ReconObjectContainer> hits3DObjects
+                = hits3D->GetObjectContainer();
+            if (hits3DObjects) {
+                double logMaxSize = 0;
+                for (Cube::ReconObjectContainer::iterator
+                         o = hits3DObjects->begin();
+                     o !=  hits3DObjects->end(); ++o) {
+                    double logSize = (*o)->GetHitSelection()->size();
+                    if (logSize > maxCount) logSize = maxCount - 1.0;
+                    if (logSize < 1.0) logSize = 1.0;
+                    logSize = std::log10(logSize);
+                    if (logMaxSize < logSize) logMaxSize = logSize;
+                    hitCount->Fill(logSize);
+                }
+                hitMaxCount->Fill(logMaxSize);
+            }
+
             TROOT::IndentLevel();
             CUBE_LOG(0) << "Final hits " << finalHits->size()
                         << std::endl;
             for (Cube::Handle<Cube::Hit>& h : (*finalHits)) {
                 hitCharge->Fill(h->GetCharge());
             }
-        }
+        } while (false);
 
         CUBE_LOG(0) << "Finished event " << outputEvent->GetRunId()
                     << "/" << outputEvent->GetEventId() << std::endl;
