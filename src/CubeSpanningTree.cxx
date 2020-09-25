@@ -53,7 +53,7 @@ Cube::SpanningTree::SpanningTree()
     : Cube::Algorithm("SpanningTree") {
 
     fDistanceType = 0;
-    fGhostHitThreshold = 9.5;
+    fOversizeCut = 3000;
 
 }
 
@@ -76,6 +76,11 @@ Cube::SpanningTree::Process(const Cube::AlgorithmResult& input,
         CUBE_ERROR << "Hits empty" << std::endl;
         return result;
     }
+
+    // Create the container for the unprocessed objects.
+    Cube::Handle<Cube::ReconObjectContainer>
+        unprocessedObjects(new Cube::ReconObjectContainer("unprocessed"));
+    result->AddObjectContainer(unprocessedObjects);
 
     // Create the container for the final objects.
     Cube::Handle<Cube::ReconObjectContainer>
@@ -103,36 +108,29 @@ Cube::SpanningTree::Process(const Cube::AlgorithmResult& input,
         if (objectHits->empty()) {
             continue;
         }
-        else if (objectHits->size() < 4) {
-            Cube::Handle<Cube::ReconCluster> cluster
-                = Cube::CreateCluster("spanningTree",
-                                      objectHits->begin(),
-                                      objectHits->end());
-            finalObjects->push_back(cluster);
-            continue;
-        }
 
         // Make a set of hits to be completely sure there are no duplicates.
         std::set<Cube::Handle<Cube::Hit>> hitSet;
-        int rejectedCount = 0;
         for (Cube::HitSelection::iterator h = objectHits->begin();
              h != objectHits->end(); ++h) {
-            if ((*h)->GetCharge() < fGhostHitThreshold) {
-                ++rejectedCount;
-                continue;
-            }
             hitSet.insert((*h));
         }
-        CUBE_LOG(0) << "SpanningTree: Ghosts rejected " << rejectedCount
-                    << " leaving " << hitSet.size() << " hits" << std::endl;
 
         if (hitSet.empty()) continue;
 
         if (hitSet.size() < 4) {
             Cube::Handle<Cube::ReconCluster> cluster
-                = Cube::CreateCluster("spanningTree",
+                = Cube::CreateCluster("spanningTreeSmall",
                                       hitSet.begin(), hitSet.end());
-            finalObjects->push_back(cluster);
+            unprocessedObjects->push_back(cluster);
+            continue;
+        }
+
+        if (hitSet.size() > fOversizeCut) {
+            Cube::Handle<Cube::ReconCluster> cluster
+                = Cube::CreateCluster("spanningTreeLarge",
+                                      hitSet.begin(), hitSet.end());
+            unprocessedObjects->push_back(cluster);
             continue;
         }
 

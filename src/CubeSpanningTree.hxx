@@ -31,15 +31,19 @@ public:
 
     void SetDistanceType(int i) {fDistanceType = i;}
 
-    void SetGhostThreshold(double q) {fGhostHitThreshold = q;}
+    void SetOversizeCut(int i) {fOversizeCut = i;}
 
 private:
 
     // Control how the edge weight is calculated.
     int fDistanceType;
 
-    // Hits below this threshold are not considered for the spanning tree.
-    double fGhostHitThreshold;
+    // The spanning tree implementation can be pretty slow, so protect against
+    // really large number of hits [the current simple implementation is
+    // O(N^3)!!!].  This keeps the code from hanging on large events.  It
+    // should be as large as possible, while preventing the reconstruction
+    // from taking several 10's of minutes for the big clusters.
+    int fOversizeCut;
 };
 #endif
 
