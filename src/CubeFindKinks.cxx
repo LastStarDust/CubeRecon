@@ -107,7 +107,7 @@ Cube::FindKinks::Process(const Cube::AlgorithmResult& input,
             continue;
         }
 
-        CUBE_LOG(0) << "Cube::FindKinks: Split Cluster" << std::endl;
+        // CUBE_LOG(0) << "Cube::FindKinks: Split Cluster" << std::endl;
 
         // Save the cluster to split.
         Cube::Handle<Cube::ReconCluster> splitCluster = (*o);
