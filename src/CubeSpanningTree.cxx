@@ -53,7 +53,7 @@ Cube::SpanningTree::SpanningTree()
     : Cube::Algorithm("SpanningTree") {
 
     fDistanceType = 0;
-    fOversizeCut = 3000;
+    fOversizeCut = 2000;
 
 }
 
@@ -122,6 +122,9 @@ Cube::SpanningTree::Process(const Cube::AlgorithmResult& input,
             Cube::Handle<Cube::ReconCluster> cluster
                 = Cube::CreateCluster("spanningTreeSmall",
                                       hitSet.begin(), hitSet.end());
+            CUBE_LOG(0) << "SpanningTree:: Skip small cluster w/ "
+                        << hitSet.size() << " hits"
+                        << std::endl;
             unprocessedObjects->push_back(cluster);
             continue;
         }
@@ -130,9 +133,16 @@ Cube::SpanningTree::Process(const Cube::AlgorithmResult& input,
             Cube::Handle<Cube::ReconCluster> cluster
                 = Cube::CreateCluster("spanningTreeLarge",
                                       hitSet.begin(), hitSet.end());
+            CUBE_LOG(0) << "SpanningTree:: Reject large cluster w/ "
+                        << hitSet.size() << " hits"
+                        << std::endl;
             unprocessedObjects->push_back(cluster);
             continue;
         }
+
+        CUBE_LOG(0) << "SpanningTree:: Build tree w/ "
+                    << hitSet.size() << " hits"
+                    << std::endl;
 
         // Build an MST and use it to find the deepest leaf.  The goal is to
         // find a hit that is at one end of a track.
