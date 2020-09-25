@@ -11,7 +11,6 @@
 #include <CubeHandle.hxx>
 #include <CubeAlgorithmResult.hxx>
 
-#define EXPLORE_RUN_TIME
 #ifdef EXPLORE_RUN_TIME
 #include <time.h>
 #include <TH2F.h>
@@ -74,6 +73,9 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
         Cube::Handle<Cube::ReconObjectContainer> unprocessed
             = currentResult->GetObjectContainer("unprocessed");
         if (unprocessed) {
+            CUBE_LOG(0) << "TreeRecon: " << unprocessed->size()
+                        << " unprocessed clusters were saved"
+                        << std::endl;
             std::copy(unprocessed->begin(), unprocessed->end(),
                       std::back_inserter(*finalObjects));
         }
