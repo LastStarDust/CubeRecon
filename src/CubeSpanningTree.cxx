@@ -122,9 +122,6 @@ Cube::SpanningTree::Process(const Cube::AlgorithmResult& input,
             Cube::Handle<Cube::ReconCluster> cluster
                 = Cube::CreateCluster("spanningTreeSmall",
                                       hitSet.begin(), hitSet.end());
-            CUBE_LOG(0) << "SpanningTree:: Skip small cluster w/ "
-                        << hitSet.size() << " hits"
-                        << std::endl;
             unprocessedObjects->push_back(cluster);
             continue;
         }
