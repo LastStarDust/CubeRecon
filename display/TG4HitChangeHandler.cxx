@@ -35,8 +35,8 @@ void Cube::TG4HitChangeHandler::Apply() {
         return;
     }
 
-    double minEnergy = 1.0;
-    double maxEnergy = 5.0;
+    double minEnergy = 0.10;
+    double maxEnergy = 1.0;
 
     if (!Cube::gEvent) return;
     std::cout << "Handle the geant4 truth hits" << std::endl;
@@ -55,17 +55,15 @@ void Cube::TG4HitChangeHandler::Apply() {
 
         TEveLine* eveHit = new TEveLine(2);
         std::ostringstream title;
-        title << "Hit(" << ")";
+        title << "Hit(" << (*g4Hit)->GetSegmentId()
+              << ":" << (*g4Hit)->GetPrimaryId()
+              << ":"<<(*g4Hit)->GetPDG() << ")";
         title << std::fixed << std::setprecision(2)
               << " " << dEdX << " MeV/mm";
-        title << " for " << length << " mm"
-              << " at (" << (*g4Hit)->GetStart().X() << " mm"
-              << "," <<  (*g4Hit)->GetStart().Y() << " mm"
-              << "," <<  (*g4Hit)->GetStart().Z() << " mm"
-              << ")";
+        title << " for " << length << " mm";
 
         eveHit->SetTitle(title.str().c_str());
-        eveHit->SetLineWidth(5);
+        eveHit->SetLineWidth(1);
         eveHit->SetLineColor(TEventDisplay::Get().LogColor(
                                  dEdX,
                                  minEnergy,
