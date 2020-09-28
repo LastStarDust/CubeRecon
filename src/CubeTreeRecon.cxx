@@ -6,10 +6,13 @@
 #include "CubeGrowClusters.hxx"
 #include "CubeGrowTracks.hxx"
 #include "CubeMergeXTalk.hxx"
+#include "CubeHitUtilities.hxx"
 
 #include <CubeLog.hxx>
 #include <CubeHandle.hxx>
 #include <CubeAlgorithmResult.hxx>
+
+#include <algorithm>
 
 #ifdef EXPLORE_RUN_TIME
 #include <time.h>
@@ -21,9 +24,14 @@ Cube::TreeRecon::TreeRecon(): Cube::Algorithm("TreeRecon") { }
 
 Cube::Handle<Cube::AlgorithmResult>
 Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
-                        const Cube::AlgorithmResult&,
-                        const Cube::AlgorithmResult&) {
+                         const Cube::AlgorithmResult&,
+                         const Cube::AlgorithmResult&) {
     CUBE_LOG(0) << "Process TreeRecon" << std::endl;
+
+    // The input hits are assumed to come from a single time-slice, and have
+    // had any ghost hit removal already done.  Every hit in the input
+    // *should* be used in the output.  Every hit in the input *should* be a
+    // cube hit.
     Cube::Handle<Cube::HitSelection> inputHits = input.GetHitSelection();
 
 #ifdef EXPLORE_RUN_TIME
@@ -67,19 +75,6 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
         currentResult = spanningTree;
         result->AddAlgorithmResult(currentResult);
 
-        // Check if there are clusters in the spanning tree unprocessed
-        // container.  If there are, then copy then straight to the final
-        // container.
-        Cube::Handle<Cube::ReconObjectContainer> unprocessed
-            = currentResult->GetObjectContainer("unprocessed");
-        if (unprocessed) {
-            CUBE_LOG(0) << "TreeRecon: " << unprocessed->size()
-                        << " unprocessed clusters were saved"
-                        << std::endl;
-            std::copy(unprocessed->begin(), unprocessed->end(),
-                      std::back_inserter(*finalObjects));
-        }
-
         // Further break the clusters based on kinks.
         Cube::Handle<Cube::AlgorithmResult> findKinks
             = Run<Cube::FindKinks>(*currentResult);
@@ -110,15 +105,86 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
 
     } while (false);            // Always stops...
 
-    // Copy the best result to the output
+    // Copy the best current result to the output
     if (currentResult) {
         Cube::Handle<Cube::ReconObjectContainer> objects
             = currentResult->GetObjectContainer("final");
         if (objects) {
-            std::copy(objects->begin(), objects->end(),
-                      std::back_inserter(*finalObjects));
+            for (Cube::ReconObjectContainer::iterator o
+                     = objects->begin();
+                 o != objects->end(); ++o) {
+                Cube::Handle<Cube::ReconTrack> t = *o;
+                if (!t) {
+                    CUBE_LOG(0) << "Should be a track!"
+                                << std::endl;
+                    continue;
+                }
+                finalObjects->push_back(t);
+            }
         }
     }
+
+    /// Apply a backstop algorithm for any hits that didn't make into the
+    /// final result.  This includes very small clusters of hits, and also
+    /// very big clusters.  The small clusters are below the tracking
+    /// threshold.  The big clusters take to long to process, and so are not
+    /// tracked.
+    do {
+        // Take all of the hits in the final objects, subtract them from the
+        // input hits, and then recluster the result.
+        Cube::Handle<Cube::HitSelection> finalHits
+            = Cube::AllHitSelection(*finalObjects);
+
+        // Make a local copy of the input hits so they can be sorted.
+        Cube::HitSelection allHits;
+        std::copy(inputHits->begin(), inputHits->end(),
+                  std::back_inserter(allHits));
+
+        // Sort the hits so set_difference can be used to remove hits that are
+        // in final.
+        std::sort(allHits.begin(), allHits.end());
+        std::sort(finalHits->begin(), finalHits->end());
+
+        // Take the set difference between all hits and the final hits.
+        Cube::HitSelection needsClustering;
+        std::set_difference(allHits.begin(),allHits.end(),
+                            finalHits->begin(),finalHits->end(),
+                            std::back_inserter(needsClustering));
+
+        CUBE_LOG(0) << "Recluster " << needsClustering.size()
+                    << " = " << allHits.size()
+                    << " - " << finalHits->size()
+                    << std::endl;
+
+        // This could happen earlier, but putting it here allows a summary to
+        // be printed.
+        if (finalHits->size() < 1) break;
+        if (allHits.size() < 1) break;
+        if (needsClustering.size() < 1) break;
+
+        ///////////////////////////////////////////////////////////////
+        // Handle the left over hits.
+        ///////////////////////////////////////////////////////////////
+
+        // Cluster the leftover hits.
+        std::unique_ptr<Cube::ClusterHits>
+            reclusterAlgo(new Cube::ClusterHits);
+        reclusterAlgo->SetName("ReclusterHits");
+        reclusterAlgo->SetCubeNeighborhood(2);
+        reclusterAlgo->SetCubeCount(1);
+        Cube::Handle<Cube::AlgorithmResult> recluster
+            = reclusterAlgo->Process(needsClustering);
+        if (!recluster) break;
+        currentResult = recluster;
+        Cube::Handle<Cube::ReconObjectContainer> newObjects
+            = currentResult->GetObjectContainer("final");
+        if (!newObjects) break;
+
+        result->AddAlgorithmResult(currentResult);
+        std::copy(newObjects->begin(), newObjects->end(),
+                  std::back_inserter(*finalObjects));
+
+    } while (false);
 
     // Save the final objects last.
     result->AddObjectContainer(finalObjects);

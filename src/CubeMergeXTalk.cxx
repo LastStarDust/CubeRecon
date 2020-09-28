@@ -163,6 +163,7 @@ Cube::MergeXTalk::Process(const Cube::AlgorithmResult& input,
         finalObjects->push_back(track);
     }
 
+#ifdef RECLUSTER_LEFTOVERS
     // build new clusters from the hits in leftOverClusters.
     HitSet clusterHits;
     for (ClusterList::iterator c = leftOverClusters.begin();
@@ -187,6 +188,7 @@ Cube::MergeXTalk::Process(const Cube::AlgorithmResult& input,
                                   points.begin(),points.end());
         finalObjects->push_back(cluster);
     }
+#endif
 
     result->AddObjectContainer(finalObjects);
 
