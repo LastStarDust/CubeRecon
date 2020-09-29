@@ -26,7 +26,7 @@ set(source
   )
 
 set(includes
-  CubeHandle.hxx CubeEvent.hxx
+  CubeLog.hxx CubeHandle.hxx CubeEvent.hxx
   CubeHit.hxx CubeHitSelection.hxx
   CubeCorrValues.hxx CubeReconState.hxx CubeVertexState.hxx
   CubeClusterState.hxx CubeShowerState.hxx CubeTrackState.hxx
