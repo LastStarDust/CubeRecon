@@ -2,9 +2,12 @@
 #define CubeEvent_hxx_seen
 #include "CubeAlgorithmResult.hxx"
 #include "CubeG4Hit.hxx"
+#include "CubeG4Trajectory.hxx"
 
 #include <TRef.h>
 #include <TROOT.h>
+
+#include <map>
 
 namespace Cube {
     class Event;
@@ -27,6 +30,7 @@ public:
         fEventId = event;
         fEDepSimEvent = TRef(evt);
         G4Hits.clear();
+        G4Trajectories.clear();
         Cube::AlgorithmResult::Initialize();
     }
 
@@ -62,8 +66,11 @@ public:
     /// to get some of the important truth information needed to debug the
     /// reconstruction.
     ////////////////////////////////////////////////////////////////////////
-    typedef std::vector<Cube::Handle<Cube::G4Hit>> G4HitVector;
-    G4HitVector G4Hits;
+    typedef std::map<int,Cube::Handle<Cube::G4Hit>> G4HitContainer;
+    G4HitContainer G4Hits;
+
+    typedef std::map<int,Cube::Handle<Cube::G4Trajectory>> G4TrajectoryContainer;
+    G4TrajectoryContainer G4Trajectories;
 
     ClassDef(Event,1);
 };
