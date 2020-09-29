@@ -18,6 +18,7 @@
 #include "CubeReconShower.hxx"
 #include "CubeReconTrack.hxx"
 #include "CubeG4Hit.hxx"
+#include "CubeG4Trajectory.hxx"
 
 #pragma link C++ class Cube::HandleBase+;
 #pragma link C++ class Cube::HandleBaseDeletable+;
@@ -87,5 +88,8 @@
 
 #pragma link C++ class Cube::G4Hit+;
 #pragma link C++ class Cube::Handle<Cube::G4Hit>+;
+
+#pragma link C++ class Cube::G4Trajectory+;
+#pragma link C++ class Cube::Handle<Cube::G4Trajectory>+;
 
 #endif

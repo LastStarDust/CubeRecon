@@ -21,7 +21,7 @@ set(source
   CubeReconVertex.cxx CubeReconCluster.cxx
   CubeReconShower.cxx CubeReconTrack.cxx
   CubeAlgorithm.cxx CubeAlgorithmResult.cxx
-  CubeG4Hit.cxx
+  CubeG4Hit.cxx CubeG4Trajectory.cxx
   TUnitsTable.cxx
   )
 
@@ -34,7 +34,7 @@ set(includes
   CubeReconVertex.hxx CubeReconCluster.hxx
   CubeReconShower.hxx CubeReconTrack.hxx
   CubeAlgorithm.hxx CubeAlgorithmResult.hxx
-  CubeG4Hit.hxx
+  CubeG4Hit.hxx CubeG4Trajectory.hxx
   TUnitsTable.hxx
   )
 
@@ -53,7 +53,7 @@ ROOT_GENERATE_DICTIONARY(G__cuberecon_io
   CubeReconVertex.hxx CubeReconCluster.hxx
   CubeReconShower.hxx CubeReconTrack.hxx
   CubeAlgorithm.hxx CubeAlgorithmResult.hxx
-  CubeG4Hit.hxx
+  CubeG4Hit.hxx CubeG4Trajectory.hxx
   OPTIONS -inlineInputHeader
   LINKDEF cuberecon_io_LinkDef.h)
 
