@@ -155,9 +155,10 @@ void Cube::ConvertERepSim(Cube::Event& event) {
         wHit.SetTimeUncertainty((*ERepSim::Input::Get().HitTimeWidth)[h]);
         wHit.SetCharge((*ERepSim::Input::Get().HitCharge)[h]);
         int segBegin = (*ERepSim::Input::Get().HitSegmentBegin)[h];
-        int segEnd = (*ERepSim::Input::Get().HitSegmentBegin)[h];
+        int segEnd = (*ERepSim::Input::Get().HitSegmentEnd)[h];
         for (int seg = segBegin; seg < segEnd; ++seg) {
-            wHit.AddContributor((*ERepSim::Input::Get().SegmentIds)[seg]);
+            int s = (*ERepSim::Input::Get().SegmentIds)[seg];
+            wHit.AddContributor(s);
         }
         wHit.SetProperty("Ratio12",ratio12);
         wHit.SetProperty("Atten1",atten1);
