@@ -59,7 +59,7 @@ Cube::CorrValues::CorrValues(const TVectorT<float>& v,
 }
 
 Cube::CorrValues::CorrValues(const TVectorT<float>& v,
-                               const TMatrixTSym<float>& cov)
+                             const TMatrixTSym<float>& cov)
     : fVector(v), fMatrix(cov),
       fNDOF(0), fTypeHash(0), fHessian(NULL) {
     if (cov.GetNcols() != fVector.GetNoElements()) {
