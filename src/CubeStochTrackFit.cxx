@@ -1152,6 +1152,11 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
     input->SetQuality(chiSquared);
     input->SetNDOF(trackDOF);
 
+    // Check the track direction based on timing and reverse if necessary.
+    double dt = input->GetBack()->GetPosition().T()
+        - input->GetFront()->GetPosition().T();
+    if (dt < 0.0) input->ReverseTrack();
+
     CUBE_LOG(0) << "Stochastic:: " << "Chi-Squared: "  << chiSquared
                 << " / " << trackDOF << " d.o.f." << std::endl;
 
