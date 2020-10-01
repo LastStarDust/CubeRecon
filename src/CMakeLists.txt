@@ -14,7 +14,7 @@ endif(ROOT_FOUND)
 # part of CubeRecon.
 set(source
   CubeERepSim.cxx
-  CubeInfo.cxx CubeHitUtilities.cxx CubeClusterManagement.cxx
+  CubeHitUtilities.cxx CubeClusterManagement.cxx
   CubeCreateTrack.cxx  CubeMakeUsed.cxx
   CubeTrackFit.cxx CubePCATrackFit.cxx CubeStochTrackFit.cxx
   CubeTimeSlice.cxx CubeMakeHits3D.cxx CubeHits3D.cxx CubeShareCharge.cxx
@@ -25,7 +25,7 @@ set(source
 
 set(includes
   CubeERepSim.hxx
-  CubeInfo.hxx CubeHitUtilities.hxx  CubeClusterManagement.hxx
+  CubeHitUtilities.hxx  CubeClusterManagement.hxx
   CubeSafeLine.hxx CubeCreateTrack.hxx CubeMakeUsed.hxx
   CubeTrackFit.hxx CubePCATrackFit.hxx CubeStochTrackFit.hxx
   CubeTimeSlice.hxx CubeMakeHits3D.hxx CubeHits3D.hxx CubeShareCharge.hxx

@@ -25,8 +25,9 @@ public:
     /// @}
 
     /// Return the projection for a hit based on the identifier.  The
-    /// projections are YZ == 6 (0b110), XZ == 5 (0b101), XY == 3 (0b011), or
-    /// XYZ == 7 (0b111).
+    /// projections are X == 1 (0b001), Y == 2 (0b010), Z = 4 (0b100),
+    /// YZ == 6 (0b110), XZ == 5 (0b101), XY == 3 (0b011),
+    //  or XYZ == 7 (0b111).
     enum { kXAxis = 1, kYAxis = 2, kZAxis = 4,
            kYZProj = 6, kXZProj = 5, kXYProj = 3,
            kXYZProj = 7};

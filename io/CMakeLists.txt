@@ -13,7 +13,7 @@ endif(ROOT_FOUND)
 # Define the source and include files that should be used for the io
 # part of CubeRecon.
 set(source
-  CubeHandle.cxx CubeEvent.cxx
+  CubeInfo.cxx CubeHandle.cxx CubeEvent.cxx
   CubeHit.cxx CubeHitSelection.cxx
   CubeCorrValues.cxx CubeReconState.cxx CubeVertexState.cxx
   CubeClusterState.cxx CubeShowerState.cxx CubeTrackState.cxx
@@ -26,7 +26,7 @@ set(source
   )
 
 set(includes
-  CubeLog.hxx CubeHandle.hxx CubeEvent.hxx
+  CubeInfo.hxx CubeLog.hxx CubeHandle.hxx CubeEvent.hxx
   CubeHit.hxx CubeHitSelection.hxx
   CubeCorrValues.hxx CubeReconState.hxx CubeVertexState.hxx
   CubeClusterState.hxx CubeShowerState.hxx CubeTrackState.hxx
