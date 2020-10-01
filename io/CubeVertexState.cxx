@@ -12,8 +12,7 @@ Cube::VertexState::VertexState() {
 
 Cube::VertexState::~VertexState() {}
 
-Cube::VertexState::VertexState(const Cube::VertexState& init)
-    : Cube::ReconState(init) {
+Cube::VertexState::VertexState(const Cube::VertexState& init) {
 
     POSITION_STATE_DEFINITION;
 

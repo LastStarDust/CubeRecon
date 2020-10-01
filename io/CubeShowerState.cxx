@@ -12,12 +12,13 @@ Cube::ShowerState::ShowerState() {
 
 Cube::ShowerState::~ShowerState() {}
 
-Cube::ShowerState::ShowerState(const Cube::ShowerState& init)
-    : Cube::ReconState(init) {
+Cube::ShowerState::ShowerState(const Cube::ShowerState& init) {
+
     ENERGY_DEPOSIT_STATE_DEFINITION;
     POSITION_STATE_DEFINITION;
     DIRECTION_STATE_DEFINITION;
     CONE_STATE_DEFINITION;
+
     Init();
 
     for (int i=0; i<GetDimensions(); ++i) {

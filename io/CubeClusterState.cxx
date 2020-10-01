@@ -13,8 +13,7 @@ Cube::ClusterState::ClusterState() {
 
 Cube::ClusterState::~ClusterState() {}
 
-Cube::ClusterState::ClusterState(const Cube::ClusterState& init)
-    : Cube::ReconState(init) {
+Cube::ClusterState::ClusterState(const Cube::ClusterState& init) {
 
     POSITION_STATE_DEFINITION;
     ENERGY_DEPOSIT_STATE_DEFINITION;

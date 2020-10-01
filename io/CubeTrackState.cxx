@@ -16,8 +16,7 @@ Cube::TrackState::TrackState() {
 
 Cube::TrackState::~TrackState() {}
 
-Cube::TrackState::TrackState(const Cube::TrackState& init)
-    : Cube::ReconState(init) {
+Cube::TrackState::TrackState(const Cube::TrackState& init) {
 
     ENERGY_DEPOSIT_STATE_DEFINITION;
     POSITION_STATE_DEFINITION;
@@ -36,7 +35,6 @@ Cube::TrackState::TrackState(const Cube::TrackState& init)
             SetCovarianceValue(i,j,init.GetCovarianceValue(i,j));
         }
     }
-
 }
 
 Cube::TrackState& Cube::TrackState::operator=(const Cube::TrackState& rhs) {
