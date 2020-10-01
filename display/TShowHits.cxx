@@ -15,7 +15,7 @@
 #include <sstream>
 
 Cube::TShowHits::TShowHits()
-    : fThreshold(0.0) { }
+    : fThreshold(10.0) { }
 
 bool Cube::TShowHits::operator () (TEveElementList* elements,
                                    const Cube::HitSelection& hits) {
