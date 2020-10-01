@@ -101,9 +101,9 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
 }
 
 bool Cube::Hits3D::MakeHit(Cube::HitSelection& writableHits,
-                             const Cube::Handle<Cube::Hit>& hit1,
-                             const Cube::Handle<Cube::Hit>& hit2,
-                             const Cube::Handle<Cube::Hit>& hit3) const {
+                           const Cube::Handle<Cube::Hit>& hit1,
+                           const Cube::Handle<Cube::Hit>& hit2,
+                           const Cube::Handle<Cube::Hit>& hit3) const {
 
     // Figure out the identifier for the new hit.
     int cubeId = -1;
@@ -113,8 +113,9 @@ bool Cube::Hits3D::MakeHit(Cube::HitSelection& writableHits,
                                          hit3->GetIdentifier());
     }
     else {
-        CUBE_ERROR << "Missing a hit needed to build a 3D Hit" << std::endl;
-        return false;
+        cubeId = Cube::Info::Combine3DST(hit1->GetIdentifier(),
+                                         hit2->GetIdentifier(),
+                                         -1);
     }
 
     // Figure out the position for the new hit.
@@ -136,26 +137,28 @@ bool Cube::Hits3D::MakeHit(Cube::HitSelection& writableHits,
     // Set the charge to the total charge.
     double qHit = hit1->GetCharge();
     qHit += hit2->GetCharge();
-    qHit += hit3->GetCharge();
+    if (hit3) qHit += hit3->GetCharge();
 
     FiberTQ fiberTQ;
 
     // Get the times for the hit.
     double dHit1 = (hitPos - hit1->GetPosition()).Mag();
     double dHit2 = (hitPos - hit2->GetPosition()).Mag();
-    double dHit3 = (hitPos - hit3->GetPosition()).Mag();
 
     double tHit1 = hit1->GetTime() - dHit1/fLightSpeed;
     double tHit2 = hit2->GetTime() - dHit2/fLightSpeed;
-    double tHit3 = hit3->GetTime() - dHit3/fLightSpeed;
 
     fiberTQ.push_back(std::make_pair(tHit1,hit1->GetCharge()));
     fiberTQ.push_back(std::make_pair(tHit2,hit2->GetCharge()));
-    fiberTQ.push_back(std::make_pair(tHit3,hit3->GetCharge()));
 
     double dtHit = std::abs(tHit1-tHit2);
-    dtHit = std::max(dtHit,std::abs(tHit1-tHit3));
-    dtHit = std::max(dtHit,std::abs(tHit2-tHit3));
+    if (hit3) {
+        double dHit3 = (hitPos - hit3->GetPosition()).Mag();
+        double tHit3 = hit3->GetTime() - dHit3/fLightSpeed;
+        dtHit = std::max(dtHit,std::abs(tHit1-tHit3));
+        dtHit = std::max(dtHit,std::abs(tHit2-tHit3));
+        fiberTQ.push_back(std::make_pair(tHit3,hit3->GetCharge()));
+    }
 
     // Check that the hits are "at the same time".  This is the largest
     // possible different between simultaneous cube times.  It's determined by
@@ -198,10 +201,13 @@ bool Cube::Hits3D::MakeHit(Cube::HitSelection& writableHits,
         hit->AddContributor(hit2->GetContributor(i));
     }
 
-    // Add the third hit.  There SHOULD be a third hit, but it's not required.
-    hit->AddHit(hit3);
-    for (int i=0; i<hit3->GetContributorCount(); ++i) {
-        hit->AddContributor(hit3->GetContributor(i));
+    if (hit3) {
+        // Add the third hit.  There SHOULD be a third hit, but it's not
+        // required.
+        hit->AddHit(hit3);
+        for (int i=0; i<hit3->GetContributorCount(); ++i) {
+            hit->AddContributor(hit3->GetContributor(i));
+        }
     }
 
     writableHits.push_back(hit);
@@ -266,6 +272,13 @@ Cube::Hits3D::Process(const Cube::AlgorithmResult& fibers,
              yz!=yzEnd; ++yz) {
             if ((*yz)->GetPosition().Z()<(*xz)->GetPosition().Z()-5) continue;
             if ((*yz)->GetPosition().Z()>(*xz)->GetPosition().Z()+5) continue;
+#ifdef MAKE_CONFUSED_2D_HITS
+            if (MakeHit(writableHits,*xz,*yz,Cube::Handle<Cube::Hit>())) {
+                usedSet.insert(*xz);
+                usedSet.insert(*yz);
+            }
+            continue;
+#endif
             int xyFiber = Cube::Info::Identifier3DST(
                 Cube::Info::CubeNumber((*xz)->GetIdentifier()),
                 Cube::Info::CubeBar((*yz)->GetIdentifier()),
@@ -309,6 +322,7 @@ Cube::Hits3D::Process(const Cube::AlgorithmResult& fibers,
         return Cube::Handle<Cube::AlgorithmResult>();
     }
 
+#ifndef MAKE_CONFUSED_2D_HITS
     // Share the charge among the 3D hits so that the total charge in the
     // event is not overcounted.  This corrects for the attenuation in the
     // fiber.
@@ -343,6 +357,7 @@ Cube::Hits3D::Process(const Cube::AlgorithmResult& fibers,
         // versions are better.
         shareCharge.MaximizeEntropy(writableHits);
     }
+#endif
 
     // Copy the writable hits into the clustered hit selection;
     Cube::HitSelection clustered;
