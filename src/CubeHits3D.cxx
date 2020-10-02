@@ -66,7 +66,7 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
         }
     }
 
-    // None of the hits are close together and time time is being take from
+    // None of the hits are close together and the time is being taken from
     // the hit with the most charge.  In this case, the uncertainty is the
     // total spread in the hit time.
     if (end - begin < 2) {

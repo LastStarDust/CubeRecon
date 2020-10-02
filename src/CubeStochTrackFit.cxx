@@ -1069,8 +1069,8 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
             Cube::Handle<Cube::ReconCluster> object = nodes[i]->GetObject();
             // Never let the variance become less than this minimum.  It
             // should be a parameter.
-            double v = std::min(object->GetPositionVariance().T(),
-                                0.6*unit::ns);
+            double v = std::max(object->GetPositionVariance().T(),
+                                0.7*unit::ns);
             xx += i*i/v;
             x += i/v;
             xy += i*object->GetPosition().T()/v;
