@@ -19,3 +19,9 @@ install(TARGETS cubeMakeHits3D RUNTIME DESTINATION bin)
 add_executable(cubeRecon cubeRecon.cxx)
 target_link_libraries(cubeRecon LINK_PUBLIC cuberecon)
 install(TARGETS cubeRecon RUNTIME DESTINATION bin)
+
+# Add a test program
+add_executable(testTrackTiming.exe testTrackTiming.cxx)
+target_link_libraries(testTrackTiming.exe LINK_PUBLIC
+  cuberecon_io cuberecon_tools)
+install(TARGETS testTrackTiming.exe RUNTIME DESTINATION bin)

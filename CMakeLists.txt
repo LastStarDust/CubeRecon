@@ -37,6 +37,7 @@ endif(ROOT_FOUND)
 
 # Compile the input/output classes needed to read CubeRecon output.
 add_subdirectory(io)
+add_subdirectory(tools)
 
 # Only build the reconstruction if this is not being built in "READONLY" mode.
 if(NOT CUBERECON_READONLY)
