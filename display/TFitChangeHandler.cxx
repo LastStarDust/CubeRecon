@@ -242,10 +242,29 @@ int Cube::TFitChangeHandler::ShowReconVertex(
         std::cout << "VertexState missing!" << std::endl;
         return index;
     }
-    TLorentzVector pos = state->GetPosition();
-    TLorentzVector var = state->GetPositionVariance();
 
     ++index;
+    TLorentzVector pos = state->GetPosition();
+    TLorentzVector var = state->GetPositionVariance();
+    double uncertainty = var.Vect().Mag();
+    if (uncertainty > 0) uncertainty = std::sqrt(uncertainty);
+    uncertainty = std::max(5.0*unit::mm,uncertainty);
+
+    TEveGeoShape *vtxShape = new TEveGeoShape("vertex");
+    vtxShape->SetName("vertex");
+    vtxShape->SetTitle("A Vertex");
+    vtxShape->SetMainColor(kRed);
+    // Set the translation
+    TGeoTranslation trans(pos.X(),
+                          pos.Y(),
+                          pos.Z());
+    vtxShape->SetTransMatrix(trans);
+    TGeoManager* saveGeom = gGeoManager;
+    gGeoManager = vtxShape->GetGeoMangeur();
+    TGeoShape* geoShape = new TGeoSphere(0.0, uncertainty);
+    vtxShape->SetShape(geoShape);
+    gGeoManager = saveGeom;
+    list->AddElement(vtxShape);
 
     std::cout << "Vertex(" << obj->GetUniqueID() << ") @ "
               << unit::AsString(pos.X(),std::sqrt(var.X()),"length")
@@ -256,7 +275,21 @@ int Cube::TFitChangeHandler::ShowReconVertex(
     Cube::Handle<Cube::ReconObjectContainer>
         constituents = obj->GetConstituents();
     if (constituents) {
-        index = ShowReconObjects(list,constituents,index);
+        for (Cube::ReconObjectContainer::iterator o = constituents->begin();
+             o != constituents->end(); ++o) {
+            Cube::Handle<Cube::ReconTrack> trk = *o;
+            if (!trk) continue;
+            TVector3 dir = trk->GetDirection();
+            TVector3 p1 = pos.Vect();
+            TVector3 p2 = pos.Vect() + 200.0*dir;
+            TEveLine* eveHit = new TEveLine(2);
+            eveHit->SetTitle("constiuent");
+            eveHit->SetLineWidth(1);
+            eveHit->SetLineColor(kRed);
+            eveHit->SetPoint(0,p1.X(),p1.Y(),p1.Z());
+            eveHit->SetPoint(1,p2.X(),p2.Y(),p2.Z());
+            list->AddElement(eveHit);
+        }
     }
 
     return index;
