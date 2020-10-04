@@ -858,7 +858,7 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
         return Cube::Handle<Cube::ReconTrack>();
     }
 
-    CUBE_LOG(0) << "Stochastic::" << "Fit with " << nodes.size()
+    CUBE_LOG(2) << "Stochastic::" << "Fit with " << nodes.size()
                 << " nodes" << std::endl;
 
     int dim = nodes.front()->GetState()->GetDimensions();
@@ -891,7 +891,7 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
     double priorCurvature;
     double priorCurvatureSigma;
     MakeCurvature(nodes,priorCurvature,priorCurvatureSigma);
-    CUBE_LOG(1) << "Stochastic::" << "Estimated curvature prior: " << priorCurvature
+    CUBE_LOG(2) << "Stochastic::" << "Estimated curvature prior: " << priorCurvature
                   << " +/- " << priorCurvatureSigma << std::endl;
     // Make a prior near the front of the track.
     std::vector<FilterMeasure> priorMeasurements;
@@ -927,7 +927,7 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
     filter.Propagator.fTimeSigma = 0.01;
     filter.Propagator.fVelocity = 1.0;
 
-    CUBE_LOG(1) << "Stochastic::" << "Direction sigma per sqrt(mm): "
+    CUBE_LOG(2) << "Stochastic::" << "Direction sigma per sqrt(mm): "
                    << filter.Propagator.fDirSigma << std::endl;
 
     // Forward filter from the front to the back of the track.  This sets the
@@ -1157,8 +1157,11 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
         - input->GetFront()->GetPosition().T();
     if (dt < 0.0) input->ReverseTrack();
 
-    CUBE_LOG(0) << "Stochastic:: " << "Chi-Squared: "  << chiSquared
-                << " / " << trackDOF << " d.o.f." << std::endl;
+    CUBE_LOG(1) << "Stochastic::"
+                << " " << nodes.size() << " nodes"
+                << " with " << fSampleCount << " samples"
+                << ", Chi-Squared: "  << chiSquared
+                << "/" << trackDOF << " d.o.f." << std::endl;
 
     return input;
 }
