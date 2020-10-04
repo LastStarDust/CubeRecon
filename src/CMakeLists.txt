@@ -21,6 +21,7 @@ set(source
   CubeRecon.cxx CubeCleanHits.cxx CubeClusterHits.cxx
   CubeTreeRecon.cxx CubeSpanningTree.cxx
   CubeFindKinks.cxx CubeGrowClusters.cxx CubeGrowTracks.cxx CubeMergeXTalk.cxx
+  CubeBuildPairwiseVertices.cxx
   )
 
 set(includes
@@ -32,6 +33,7 @@ set(includes
   CubeRecon.hxx CubeCleanHits.hxx CubeTreeRecon.hxx
   CubeClusterHits.hxx CubeSpanningTree.hxx
   CubeFindKinks.hxx CubeGrowClusters.hxx CubeGrowTracks.hxx  CubeMergeXTalk.hxx
+  CubeBuildPairwiseVertices.hxx
   )
 
 # Make sure the current directories are available for the later

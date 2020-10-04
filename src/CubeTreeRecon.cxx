@@ -1,4 +1,5 @@
 #include "CubeTreeRecon.hxx"
+#include "CubeHitUtilities.hxx"
 #include "CubeMakeUsed.hxx"
 #include "CubeClusterHits.hxx"
 #include "CubeSpanningTree.hxx"
@@ -6,7 +7,7 @@
 #include "CubeGrowClusters.hxx"
 #include "CubeGrowTracks.hxx"
 #include "CubeMergeXTalk.hxx"
-#include "CubeHitUtilities.hxx"
+#include "CubeBuildPairwiseVertices.hxx"
 
 #include <CubeLog.hxx>
 #include <CubeHandle.hxx>
@@ -115,8 +116,8 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
                  o != objects->end(); ++o) {
                 Cube::Handle<Cube::ReconTrack> t = *o;
                 if (!t) {
-                    CUBE_LOG(0) << "Should be a track!"
-                                << std::endl;
+                    CUBE_ERROR << "Only tracks please!!"
+                               << std::endl;
                     continue;
                 }
                 finalObjects->push_back(t);
@@ -124,9 +125,22 @@ Cube::TreeRecon::Process(const Cube::AlgorithmResult& input,
         }
     }
 
+    // Now build vertices.  This should be after all of the tracks and showers
+    // are built.
+    Cube::Handle<Cube::AlgorithmResult> buildVertices
+        = Run<Cube::BuildPairwiseVertices>(*currentResult);
+    currentResult = buildVertices;
+    if (currentResult) {
+        result->AddAlgorithmResult(currentResult);
+        Cube::Handle<Cube::ReconObjectContainer> objects
+            = currentResult->GetObjectContainer("final");
+        std::copy(objects->begin(), objects->end(),
+                  std::back_inserter(*finalObjects));
+    }
+
     /// Apply a backstop algorithm for any hits that didn't make into the
-    /// final result.  This includes very small clusters of hits, and also
-    /// very big clusters.  The small clusters are below the tracking
+    /// final tracking result.  This includes very small clusters of hits, and
+    /// also very big clusters.  The small clusters are below the tracking
     /// threshold.  The big clusters take to long to process, and so are not
     /// tracked.
     do {
