@@ -164,6 +164,7 @@ void Cube::ConvertERepSim(Cube::Event& event) {
         wHit.SetProperty("Atten1",atten1);
         wHit.SetProperty("Atten2",atten2);
         wHit.SetProperty("Reflectivity",reflect);
+        wHit.SetProperty("Size",pitchX); // assume same pitchX, Y, and Z.
         Cube::Handle<Cube::Hit> hit(new Cube::Hit(wHit));
         hits->push_back(hit);
     }
