@@ -14,10 +14,12 @@ endif(ROOT_FOUND)
 # part of CubeRecon.
 set(source
   ToolPrimaryId.cxx ToolG4Hits.cxx ToolMainTrajectory.cxx ToolTrueDirection.cxx
+  ToolCubeTruth.cxx
   )
 
 set(includes
   ToolPrimaryId.hxx ToolG4Hits.hxx ToolMainTrajectory.hxx ToolTrueDirection.hxx
+  ToolCubeTruth.hxx
   )
 
 # Make sure the current directories are available for the later
