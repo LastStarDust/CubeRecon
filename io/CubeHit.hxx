@@ -97,7 +97,10 @@ public:
     /// Check if a property exists.
     virtual bool HasProperty(std::string name) const;
 
-    /// Get a property value.
+    /// Get a property value.  Common propertie values that may exist are the
+    /// attenuation constants ("Atten1", "Atten2", "Ratio12", "Reflectivity"),
+    /// the cube "Size".  This will throw a runtime_error if the property
+    /// doesn't exist.
     virtual double GetProperty(std::string name) const;
 
     /// Print the hit information.

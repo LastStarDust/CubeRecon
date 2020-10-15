@@ -78,6 +78,7 @@ bool Cube::Hit::HasProperty(std::string name) const {
 double Cube::Hit::GetProperty(std::string name) const {
     std::map<std::string,double>::const_iterator p = fProperties.find(name);
     if (p != fProperties.end()) return p->second;
+    throw std::runtime_error("Cube::Hit Property does not exist");
     return 0.0;
 }
 
