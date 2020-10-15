@@ -16,6 +16,7 @@
 #include <TTree.h>
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TProfile.h>
 
 #include <iostream>
 #include <sstream>
@@ -28,6 +29,7 @@ void AnalyzeEvent(Cube::Event& event) {
 
     static TH2F* histTrackTiming = NULL;
     static TH2F* histDirectionTiming = NULL;
+    static TProfile* profDirectionTiming = NULL;
     if (!histTrackTiming) {
         std::cout << "Create the histogram" << std::endl;
         histTrackTiming = new TH2F("trackTiming","Time versus length",
@@ -37,13 +39,16 @@ void AnalyzeEvent(Cube::Event& event) {
                                    "Time versus length rel. to direction",
                                    30,0.0,3000.0,
                                    40,-20.0,20.0);
+        profDirectionTiming = new TProfile(
+            "profileTiming",
+            "Time versus length rel. to direction",
+            30,0.0,3000.0,"s");
     }
 
     Cube::Handle<Cube::ReconObjectContainer> objects
         = event.GetObjectContainer();
     if (!objects) return;
 
-    std::cout << "Reconstructed Objects: " << objects->size() << std::endl;
     for (Cube::ReconObjectContainer::iterator o = objects->begin();
          o != objects->end(); ++o) {
         Cube::Handle<Cube::ReconTrack> track = *o;
@@ -63,16 +68,17 @@ void AnalyzeEvent(Cube::Event& event) {
         if (!traj) {
             std::cout << "oops" << std::endl;
         }
+        double mainPurity = Cube::Tool::MainPurity(event,*track);
+        if (mainPurity < 0.9) continue;
         TLorentzVector front = track->GetFront()->GetPosition();
         TLorentzVector back = track->GetBack()->GetPosition();
         double dT = back.T() - front.T();
         double dL = (back.Vect() - front.Vect()).Mag();
         double dCos = track->GetDirection()*trueD;
-        std::cout << primTraj << " " << mainTraj << " " << trueT
-                  << " " << dCos << " " << dT << " " << dL << std::endl;
         histTrackTiming->Fill(dL,dT);
-        if (dCos > 0.0) histDirectionTiming->Fill(dL,dT);
-        else histDirectionTiming->Fill(dL,-dT);
+        if (dCos < 0.0) dT = -dT;
+        histDirectionTiming->Fill(dL,dT);
+        profDirectionTiming->Fill(dL,dT);
     }
 }
 
