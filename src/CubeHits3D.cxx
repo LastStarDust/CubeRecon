@@ -41,45 +41,25 @@ Cube::Hits3D::~Hits3D() { }
 // none of the fibers are in coincidence, this returns the average of all
 // three fibers with a large uncertainty.
 std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
-    const double hitRes = 1.25*unit::ns/std::sqrt(12.0);
+    // Intrinsic resolution for a hit.
+    const double hitRes = 1.0*unit::ns/std::sqrt(12.0);
 
-    // Find the best window for the hit time.
-    const double timeWindow = 5.0*unit::ns;
+    // Find the window for to average hit times.
+    const double timeWindow = 2.5*unit::ns;
+
+    // Order the fiber times.  The times are transit time corrected.
     std::sort(fiberTQ.begin(),fiberTQ.end());
-    FiberTQ::iterator begin = fiberTQ.begin();
-    FiberTQ::iterator end = fiberTQ.end();
-    if (fiberTQ.back().first-fiberTQ.front().first > timeWindow) {
-        // The hit time spread is large, so find the ones in a window.
-        FiberTQ::iterator begin = fiberTQ.begin();
-        FiberTQ::iterator end = begin + 1;
-        double bestCharge = begin->second;
-        for (FiberTQ::iterator t = fiberTQ.begin(); t != fiberTQ.end(); ++t) {
-            double theCharge = 0.0;
-            for (FiberTQ::iterator tt = t; tt != fiberTQ.end(); ++tt) {
-                if (tt->first - t->first > timeWindow) break;
-                theCharge += tt->second;
-                if (theCharge < bestCharge) continue;
-                bestCharge = theCharge;
-                begin = t;
-                end = tt + 1;
-            }
-        }
-    }
 
-    // None of the hits are close together and the time is being taken from
-    // the hit with the most charge.  In this case, the uncertainty is the
-    // total spread in the hit time.
-    if (end - begin < 2) {
-        double dt = fiberTQ.back().first - fiberTQ.front().first;
-        if (dt < hitRes) dt = hitRes;
-        return std::pair<double,double>(begin->first,dt);
-    }
-
-    // Now take the charge weighted average and RMS.
+    // Now take the charge weighted average and RMS of the late hits.  This is
+    // an approximation of using the fibers that have a localized region of
+    // energy deposition.  Because of geometry, the latest will usually be
+    // from a fiber that the current cube is the closest to the sensor.
     double tSum = 0.0;
     double ttSum = 0.0;
     double qSum = 0.0;
-    for (FiberTQ::iterator t = begin; t != end; ++t) {
+    double lastTime = fiberTQ.back().first;
+    for (FiberTQ::iterator t = fiberTQ.begin(); t != fiberTQ.end(); ++t) {
+        if (t->first < lastTime - timeWindow) continue;
         tSum += t->second*t->first;
         ttSum += t->second*t->first*t->first;
         qSum += t->second;
@@ -91,7 +71,7 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
         double tRMS = ttSum - tHit*tHit;
         if (tRMS > 0.0) tRMS = std::sqrt(tRMS);
         else tRMS = 0.0;
-        tRMS = std::max(tRMS,hitRes/std::sqrt(1.0*(end-begin)));
+        tRMS = std::max(tRMS,hitRes);
         return std::pair<double,double>(tHit,tRMS);
     }
 
