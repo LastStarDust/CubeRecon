@@ -15,20 +15,18 @@ double Cube::Tool::CubeDeposit(Cube::Event& event,
     std::vector<Cube::Handle<Cube::G4Hit>> hits
         = Cube::Tool::HitG4Hits(event,hit);
 
-    double size = 10.0*unit::mm;
-    try {size = hit->GetProperty("Size");}
-    catch (...) {size = 10.0*unit::mm;}
+    double size = hit->GetSize().X();
 
     double deposit = 0.0;
     for (std::vector<Cube::Handle<Cube::G4Hit>>::iterator h = hits.begin();
          h != hits.end(); ++h) {
         TVector3 avg = 0.5*((*h)->GetStart().Vect() + (*h)->GetStop().Vect());
         double v = std::abs(hit->GetPosition().X() - avg.X());
-        if (v > 0.5*size) continue;
+        if (v > size) continue;
         v = std::abs(hit->GetPosition().Y() - avg.Y());
-        if (v > 0.5*size) continue;
+        if (v > size) continue;
         v = std::abs(hit->GetPosition().Z() - avg.Z());
-        if (v > 0.5*size) continue;
+        if (v > size) continue;
         deposit += (*h)->GetEnergyDeposit();
     }
 
@@ -40,20 +38,16 @@ double Cube::Tool::CubeCrossTalk(Cube::Event& event,
     std::vector<Cube::Handle<Cube::G4Hit>> hits
         = Cube::Tool::HitG4Hits(event,hit);
 
-    double size = 10.0*unit::mm;
-    try {size = hit->GetProperty("Size");}
-    catch (...) {size = 10.0*unit::mm;}
+    double size = hit->GetSize().X();
 
     double deposit = 0.0;
     for (std::vector<Cube::Handle<Cube::G4Hit>>::iterator h = hits.begin();
          h != hits.end(); ++h) {
         TVector3 avg = 0.5*((*h)->GetStart().Vect() + (*h)->GetStop().Vect());
-        double v = std::abs(hit->GetPosition().X() - avg.X());
-        if (v < 0.5*size) continue;
-        v = std::abs(hit->GetPosition().Y() - avg.Y());
-        if (v < 0.5*size) continue;
-        v = std::abs(hit->GetPosition().Z() - avg.Z());
-        if (v < 0.5*size) continue;
+        double x = std::abs(hit->GetPosition().X() - avg.X());
+        double y = std::abs(hit->GetPosition().Y() - avg.Y());
+        double z = std::abs(hit->GetPosition().Z() - avg.Z());
+        if (x < size && y < size && z < size) continue;
         deposit += (*h)->GetEnergyDeposit();
     }
 

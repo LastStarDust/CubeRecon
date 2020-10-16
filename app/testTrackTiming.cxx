@@ -23,13 +23,17 @@
 #include <map>
 #include <set>
 
+static TH2F* histTrackTiming = NULL;
+static TH2F* histDirectionTiming = NULL;
+static TProfile* profDirectionTiming = NULL;
+static TH1F* histTrackLength = NULL;
+static TH1F* histCorrectDirection = NULL;
+static TH1F* histDirectionEfficiency = NULL;
+
 /// Filter through tracks, and assign them to trajectories.  Then check the
 /// timing to see if it properly tags the track direction.
 void AnalyzeEvent(Cube::Event& event) {
 
-    static TH2F* histTrackTiming = NULL;
-    static TH2F* histDirectionTiming = NULL;
-    static TProfile* profDirectionTiming = NULL;
     if (!histTrackTiming) {
         std::cout << "Create the histogram" << std::endl;
         histTrackTiming = new TH2F("trackTiming","Time versus length",
@@ -43,6 +47,15 @@ void AnalyzeEvent(Cube::Event& event) {
             "profileTiming",
             "Time versus length rel. to direction",
             30,0.0,3000.0,"s");
+        histTrackLength = new TH1F("trackLength",
+                                   "Track Length (all tracks)",
+                                   20,0.0,2000.0);
+        histCorrectDirection = new TH1F("correctDirection",
+                                   "Track Length (w/ correct direction)",
+                                   20,0.0,2000.0);
+        histDirectionEfficiency = new TH1F("directionEfficiency",
+                                           "Efficiency vs Track Length",
+                                           20,0.0,2000.0);
     }
 
     Cube::Handle<Cube::ReconObjectContainer> objects
@@ -76,7 +89,9 @@ void AnalyzeEvent(Cube::Event& event) {
         double dL = (back.Vect() - front.Vect()).Mag();
         double dCos = track->GetDirection()*trueD;
         histTrackTiming->Fill(dL,dT);
+        histTrackLength->Fill(dL);
         if (dCos < 0.0) dT = -dT;
+        else histCorrectDirection->Fill(dL);
         histDirectionTiming->Fill(dL,dT);
         profDirectionTiming->Fill(dL,dT);
     }
@@ -151,6 +166,9 @@ int main(int argc, char** argv) {
                     << "/" << inputEvent->GetEventId() << std::endl;
         AnalyzeEvent(*inputEvent);
     }
+
+    histDirectionEfficiency->Divide(histCorrectDirection,
+                                    histTrackLength,1.0,1.0,"B");
 
     if (outputFile) {
         outputFile->Write();

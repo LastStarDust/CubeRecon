@@ -16,7 +16,7 @@ namespace Cube {
         /// Determine the true time that the cube was hit.  The time is based
         /// on when it crosses a certain energy deposition threshold.
         double CubeTime(Cube::Event& event, Cube::Handle<Cube::Hit> hit,
-                        double threshold = 1.5 /*MeV*/);
+                        double threshold = 0.1 /*MeV*/);
 
     }
 }

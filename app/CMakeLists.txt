@@ -25,3 +25,9 @@ add_executable(testTrackTiming.exe testTrackTiming.cxx)
 target_link_libraries(testTrackTiming.exe LINK_PUBLIC
   cuberecon_io cuberecon_tools)
 install(TARGETS testTrackTiming.exe RUNTIME DESTINATION bin)
+
+# Add a test program
+add_executable(testHitTiming.exe testHitTiming.cxx)
+target_link_libraries(testHitTiming.exe LINK_PUBLIC
+  cuberecon_io cuberecon_tools)
+install(TARGETS testHitTiming.exe RUNTIME DESTINATION bin)
