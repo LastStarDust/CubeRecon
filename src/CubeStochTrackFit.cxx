@@ -1033,10 +1033,10 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
         double eWght = 0.0;
         for (int j = (int) -2*width; j < (int) 2*width + 1; ++j) {
             int k = i + j;
-            if (k < 0) continue;
-            if (nodes.size() <= k) continue;
+            if (k < 1) continue;
+            if (nodes.size() <= k + 1) continue;
             Cube::Handle<Cube::ReconCluster> object = nodes[k]->GetObject();
-            double r = std::exp(0.5*k/width);
+            double r = std::exp(-0.5*j*j/width);
             eDep += r*object->GetEDeposit();
             eWght += r;
         }
