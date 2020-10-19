@@ -42,7 +42,7 @@ Cube::Hits3D::~Hits3D() { }
 // three fibers with a large uncertainty.
 std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
     // Intrinsic resolution for a hit.
-    const double hitRes = 1.0*unit::ns/std::sqrt(12.0);
+    const double hitRes = 0.7*unit::ns;
 
     // Find the window for to average hit times.
     const double timeWindow = 2.5*unit::ns;
@@ -59,10 +59,12 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
     double qSum = 0.0;
     double lastTime = fiberTQ.back().first;
     for (FiberTQ::iterator t = fiberTQ.begin(); t != fiberTQ.end(); ++t) {
-        if (t->first < lastTime - timeWindow) continue;
-        tSum += t->second*t->first;
-        ttSum += t->second*t->first*t->first;
-        qSum += t->second;
+        double w = t->second;
+        double tt = t->first;
+        if (tt < lastTime - timeWindow) continue;
+        tSum += w*tt;
+        ttSum += w*tt*tt;
+        qSum += w;
     }
 
     if (qSum > 0.0) {
@@ -77,7 +79,7 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
 
     CUBE_ERROR << "Invalid hit time" << std::endl;
     throw std::runtime_error("Invalid cube hit");
-    return std::pair<double,double>();
+    return std::pair<double,double>();  // Keep the compiler happy.
 }
 
 bool Cube::Hits3D::MakeHit(Cube::HitSelection& writableHits,
