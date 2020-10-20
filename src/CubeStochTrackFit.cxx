@@ -1026,17 +1026,16 @@ Cube::StochTrackFit::Apply(Cube::Handle<Cube::ReconTrack>& input) {
     // nodes are uniformly spaced along the track, or put another way, each
     // node samples a uniform length of track.  Because of how SFG pattern
     // recognition works, this should USUALLY be true.
-    double width = 3.0;
     double eSum = 0.0;
     for (int i = 0; i < (int) nodes.size(); ++i) {
         double eDep = 0.0;
         double eWght = 0.0;
-        for (int j = (int) -2*width; j < (int) 2*width + 1; ++j) {
+        for (int j = (int) -2*fWidth-1; j < (int) 2*fWidth + 2; ++j) {
             int k = i + j;
             if (k < 1) continue;
             if (nodes.size() <= k + 1) continue;
             Cube::Handle<Cube::ReconCluster> object = nodes[k]->GetObject();
-            double r = std::exp(-0.5*j*j/width);
+            double r = std::exp(-0.5*j*j/fWidth);
             eDep += r*object->GetEDeposit();
             eWght += r;
         }

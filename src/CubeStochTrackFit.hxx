@@ -39,10 +39,19 @@ public:
     /// Get the number of samples that will be used in the next call to Apply.
     int GetSampleCount() const {return fSampleCount;}
 
+    /// Set the size of the energy deposition calculation region.
+    void SetDepositionWindow(double v) {fWidth = v;}
+
 private:
     // The number of samples in the sample vector that is used to describe the
     // PDF.
     int fSampleCount;
+
+    // The define the region over which the energy deposition is calculated.
+    // This can be thought of as the Gaussian window that the deposition is
+    // averaged over.  The units are implementation specific (currently
+    // indexed by node).
+    double fWidth;
 };
 #endif
 
