@@ -44,7 +44,7 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
     // Intrinsic resolution for a hit.
     const double hitRes = 0.7*unit::ns;
 
-    // Find the window for to average hit times.
+    // Set the window to average hit times over.
     const double timeWindow = 2.5*unit::ns;
 
     // Order the fiber times.  The times are transit time corrected.
@@ -53,18 +53,18 @@ std::pair<double,double> Cube::Hits3D::HitTime(FiberTQ& fiberTQ) const {
     // Now take the charge weighted average and RMS of the late hits.  This is
     // an approximation of using the fibers that have a localized region of
     // energy deposition.  Because of geometry, the latest will usually be
-    // from a fiber that the current cube is the closest to the sensor.
+    // from a fiber that the current cube is the close to the sensor.
     double tSum = 0.0;
     double ttSum = 0.0;
     double qSum = 0.0;
     double lastTime = fiberTQ.back().first;
     for (FiberTQ::iterator t = fiberTQ.begin(); t != fiberTQ.end(); ++t) {
-        double w = t->second;
+        double ww = t->second;
         double tt = t->first;
         if (tt < lastTime - timeWindow) continue;
-        tSum += w*tt;
-        ttSum += w*tt*tt;
-        qSum += w;
+        tSum += ww*tt;
+        ttSum += ww*tt*tt;
+        qSum += ww;
     }
 
     if (qSum > 0.0) {
@@ -328,6 +328,7 @@ Cube::Hits3D::Process(const Cube::AlgorithmResult& fibers,
         // three measurements came from the same mean.
         shareCharge.ApplyConstraints(writableHits);
     }
+#ifdef ROOT_CHANGED_API_BREAKS_THIS
     else if (fShareCharge == 3) {
         // Share the charge applying a Bayesian probability with a maximum
         // entropy prior.  The probability is based on predicting the
@@ -339,6 +340,7 @@ Cube::Hits3D::Process(const Cube::AlgorithmResult& fibers,
         // versions are better.
         shareCharge.MaximizeEntropy(writableHits);
     }
+#endif
 #endif
 
     // Copy the writable hits into the clustered hit selection;
