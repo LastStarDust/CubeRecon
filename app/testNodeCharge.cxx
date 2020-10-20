@@ -28,10 +28,14 @@
 
 static TH2F* histClusterCharge = NULL;
 static TH2F* histStateDeposit = NULL;
+static TH2F* histProtonContainedCharge = NULL;
 static TH2F* histProtonContainedDeposit = NULL;
+static TH2F* histProtonContainedDiff = NULL;
+static TH1F* histProtonContainedProj = NULL;
 static TH2F* histProtonExitingDeposit = NULL;
 static TH2F* histMuonContainedDeposit = NULL;
 static TH2F* histMuonExitingDeposit = NULL;
+static TH1F* histMuonExitingProj = NULL;
 static TH2F* histOtherContainedDeposit = NULL;
 static TH2F* histOtherExitingDeposit = NULL;
 static TH2F* histTrackDiff = NULL;
@@ -44,43 +48,61 @@ void AnalyzeEvent(Cube::Event& event) {
         std::cout << "Create the histogram" << std::endl;
         histClusterCharge = new TH2F("clusterCharge","Charge versus node",
                                    backNodes,0.0,1.0*backNodes,
-                                   50,0.0,2000.0);
+                                   100,0.0,2500.0);
         histStateDeposit = new TH2F("stateDeposit","Deposit versus node",
                                     backNodes,0.0,1.0*backNodes,
-                                    50,0.0,2000.0);
+                                    100,0.0,2500.0);
+        histProtonContainedCharge
+            = new TH2F("protonCharge",
+                       "Charge versus node for contained protons",
+                       backNodes,0.0,1.0*backNodes,
+                       100,0.0,2500.0);
         histProtonContainedDeposit
             = new TH2F("protonContained",
                        "Deposit versus node for contained protons",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
+        histProtonContainedDiff
+            = new TH2F("protonContainedDiff",
+                       "Fraction difference versus node for contained protons",
+                       backNodes,0.0,1.0*backNodes,
+                       40,-1.0,3.0);
+        histProtonContainedProj
+            = new TH1F("protonContainedDiffProj",
+                       "Fraction difference versus node for contained protons",
+                       40,-1.0,3.0);
         histProtonExitingDeposit
             = new TH2F("protonExiting",
                        "Deposit versus node for exiting protons",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
         histMuonContainedDeposit
             = new TH2F("muonContained",
                        "Deposit versus node for contained muons",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
         histMuonExitingDeposit
             = new TH2F("muonExiting",
                        "Deposit versus node for exiting muons",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
+        histMuonExitingProj
+            = new TH1F("muonExitingProj",
+                       "Fraction difference versus node for exiting muons",
+                       40,-1.0,3.0);
         histOtherContainedDeposit
             = new TH2F("otherContained",
                        "Deposit versus node for contained others",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
         histOtherExitingDeposit
             = new TH2F("otherExiting",
                        "Deposit versus node for exiting others",
                        backNodes,0.0,1.0*backNodes,
-                       50,0.0,2000.0);
+                       100,0.0,2500.0);
         histTrackDiff = new TH2F("trackDiff","Charge difference versus node",
                                  backNodes,0.0,1.0*backNodes,
-                                 110,-1.0,10.0);
+                                 40,-1.0,3.0);
     }
 
     Cube::Handle<Cube::ReconObjectContainer> objects
@@ -136,16 +158,18 @@ void AnalyzeEvent(Cube::Event& event) {
             if (i > backNodes) continue;
             histStateDeposit->Fill(i-0.5, st->GetEDeposit());
             histClusterCharge->Fill(i-0.5, cl->GetEDeposit());
-            double d = cl->GetEDeposit()-st->GetEDeposit();
-            d /= st->GetEDeposit();
-            histTrackDiff->Fill(i-0.5, d);
+            double delta = cl->GetEDeposit()-st->GetEDeposit();
+            delta /= st->GetEDeposit();
+            histTrackDiff->Fill(i-0.5, delta);
             if (std::abs(mainPDG) == 2212) {
                 if (containment > 5) {
+                    histProtonContainedCharge->Fill(i-0.5, cl->GetEDeposit());
                     histProtonContainedDeposit->Fill(i-0.5, st->GetEDeposit());
+                    histProtonContainedDiff->Fill(i-0.5, delta);
+                    histProtonContainedProj->Fill(delta);
                 }
                 else if (containment < 1) {
                     histProtonExitingDeposit->Fill(i-0.5, st->GetEDeposit());
-
                 }
             }
             else if (std::abs(mainPDG) == 13) {
@@ -154,7 +178,7 @@ void AnalyzeEvent(Cube::Event& event) {
                 }
                 else if (containment < 1) {
                     histMuonExitingDeposit->Fill(i-0.5, st->GetEDeposit());
-
+                    histMuonExitingProj->Fill(delta);
                 }
             }
             else {
