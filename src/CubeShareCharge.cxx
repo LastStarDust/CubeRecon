@@ -655,7 +655,8 @@ namespace {
             : fShareCharge(shared) {
             fAverageDeposit = fShareCharge->GetTotalDeposit();
             fAverageDeposit /= fShareCharge->GetAugmentedCubeCount();
-            CUBE_LOG(0) << "Average deposit is " << fAverageDeposit << std::endl;
+            CUBE_LOG(0) << "Average deposit is " << fAverageDeposit
+                        << std::endl;
         }
         ~CubeMaxEntropy() {}
         IBaseFunctionMultiDimTempl* Clone() const {return NULL;}
