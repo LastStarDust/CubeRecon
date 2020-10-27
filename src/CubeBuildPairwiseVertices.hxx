@@ -38,10 +38,16 @@ public:
     /// vertex, and a typical value might be 0.05.
     void SetLikelihoodCut(double v) {fLikelihoodCut = v;}
 
-    /// Set the allowed overlap for a track.  The vertex must be within this
-    /// distance of one end of a track (A typical value is 10 mm which means
-    /// the track can "overshoot" the vertex by 1 cube).
-    void SetOverlap(double v) {fOverlapCut = v;}
+    /// Set the allowed overlap for a track.  The vertex must overlap the
+    /// track by less than this distance for one end of a track (A typical
+    /// value is 10 mm which means the track can "overshoot" the vertex by 1
+    /// cube).
+    void SetOverlap(double v) {fMaxOverlap = v;}
+
+    /// Set the allowed distance from the track to the vertex.  The vertex
+    /// must be within this distance of one end of a track (A typical value is
+    /// 100 mm).
+    void SetDistance(double v) {fMaxDistance = v;}
 
     /// Set the maximum allowed approach distance to be considered for a
     /// vertex.
@@ -52,9 +58,6 @@ public:
     /// different algorithm), but not used to select a vertex.
     void SetMinTrackLength(double v) {fMinTrackLength = v;}
 
-    /// Set the minimum variance based on cube size [nominally (5mm)^2].
-    void SetMinVariance(double v) {fMinVariance = v;}
-
 private:
 
     // Stop combining vertices when the likelihood goes below this.  This is a
@@ -62,21 +65,21 @@ private:
     // TMath::Prob.
     double fLikelihoodCut;
 
-    // The allowed overshoot for a track with a vertex.  This is only applied
-    // when building the initial vertices.  It is not enforced when the
-    // vertices are combined.
-    double fOverlapCut;
+    // The maximum allowed overshoot for a track with a vertex.  This is only
+    // applied when building the initial vertices.  It is not enforced when
+    // the vertices are combined.  A typical value would be 1 cm so that the
+    // track can overlap the vertex position by one cube.
+    double fMaxOverlap;
+
+    // The maximum allowed distance between the track and the vertex.  This
+    // prevents creating vertices from tracks that are a long way from the
+    // intersection point.
+    double fMaxDistance;
 
     // The maximum allowed approach distance.  Tracks must pass within this
     // distance of each other to be formed into a vertex.  This is not
     // enforced when vertices are combined.
     double fMaxApproach;
-
-    // The minimum variance for a vertex.  This is based on the cube size.
-    // Note that this algorithm is doing pattern recognition, and not a
-    // precise fit of the vertex position.  This may slightly over-estimate
-    // the actual variance.
-    double fMinVariance;
 
     // The minimum track length for adding to a vertex.
     double fMinTrackLength;

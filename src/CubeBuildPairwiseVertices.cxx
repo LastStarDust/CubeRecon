@@ -6,6 +6,7 @@
 #include <CubeLog.hxx>
 #include <CubeMakeUsed.hxx>
 #include <CubeUnits.hxx>
+#include <CubeVertexFit.hxx>
 
 #include <TVector3.h>
 #include <TMath.h>
@@ -16,11 +17,10 @@
 Cube::BuildPairwiseVertices::BuildPairwiseVertices(const char* name)
     : Cube::Algorithm(name,"Build vertices for tracks that connect") {
     fLikelihoodCut = 0.05;
-    fOverlapCut = 10.0*unit::mm;
-    fMaxApproach = 20.0*unit::mm;
-    fMinVariance = 5.0*unit::mm;
-    fMinVariance = fMinVariance*fMinVariance;
-    fMinTrackLength = 10.0*unit::cm;
+    fMaxOverlap = 10.0*unit::mm;
+    fMaxDistance = 50.0*unit::cm;
+    fMaxApproach = 40.0*unit::mm;
+    fMinTrackLength = 5.0*unit::cm;
 }
 
 Cube::BuildPairwiseVertices::~BuildPairwiseVertices() {}
@@ -91,14 +91,15 @@ Cube::BuildPairwiseVertices::Process(const Cube::AlgorithmResult& input,
             for (std::list<Cube::Handle<Cube::ReconVertex>>::iterator v2=v1;
                  v2 != allVertices.end(); ++v2) {
                 if (v1 == v2) continue;
+                double d = ((*v1)->GetPosition().Vect()
+                            - (*v2)->GetPosition().Vect()).Mag();
+                if (d > fMaxApproach) continue;
                 Cube::Handle<Cube::ReconVertex> checkVertex
                     = CombineVertices(*v1,*v2);
                 if (!checkVertex) continue;
                 double prob = TMath::Prob(checkVertex->GetQuality(),
                                           checkVertex->GetNDOF());
                 if (bestProb > prob) continue;
-                double d = ((*v1)->GetPosition().Vect()
-                            - (*v2)->GetPosition().Vect()).Mag();
                 vtx1 = v1;
                 vtx2 = v2;
                 bestDist = d;
@@ -211,23 +212,25 @@ Cube::BuildPairwiseVertices::CombineVertices(
     var2 += vertex2->GetPositionVariance().Y()/3.0;
     var2 += vertex2->GetPositionVariance().Z()/3.0;
 
-    // Find the average position for the new vertex
+    // Find the average position for the new vertex.  This will be the
+    // starting position for the fit.
     TVector3 pos = (1.0/var1)*vertex1->GetPosition().Vect()
         + (1.0/var2)*vertex2->GetPosition().Vect();
     pos = pos*(1.0/(1.0/var1 + 1.0/var2));
     double t = 0.5*(vertex1->GetPosition().T() + vertex2->GetPosition().T());
     vtx->GetState()->SetPosition(pos.X(),pos.Y(),pos.Z(),t);
 
+    Cube::Handle<Cube::ReconObjectContainer> constituents;
     std::set<Cube::Handle<Cube::ReconTrack>> tracks;
-    Cube::Handle<Cube::ReconObjectContainer> constituents
-        = vertex1->GetConstituents();
+
+    constituents = vertex1->GetConstituents();
     if (constituents) {
         for (Cube::ReconObjectContainer::iterator c = constituents->begin();
              c != constituents->end(); ++c) {
             tracks.insert(*c);
         }
     }
-    int extraTracks = tracks.size();
+
     constituents = vertex2->GetConstituents();
     if (constituents) {
         for (Cube::ReconObjectContainer::iterator c = constituents->begin();
@@ -235,22 +238,6 @@ Cube::BuildPairwiseVertices::CombineVertices(
             tracks.insert(*c);
         }
     }
-    extraTracks = tracks.size() - extraTracks;
-
-    double chi2 = 0.0;
-    if (extraTracks > 0) {
-        chi2 += (vertex1->GetPosition().Vect() - pos).Mag2()/var1;
-        chi2 += (vertex2->GetPosition().Vect() - pos).Mag2()/var2;
-        chi2 += vertex1->GetQuality();
-        chi2 += vertex2->GetQuality();
-    }
-    else {
-        // In principle, the two vertices should have the same quality, but
-        // order of combination does matter a bit.
-        chi2 = std::min(vertex1->GetQuality(),vertex2->GetQuality());
-    }
-
-    vtx->SetQuality(chi2);
 
     double dof = 0;
     for (std::set<Cube::Handle<Cube::ReconTrack>>::iterator t = tracks.begin();
@@ -265,8 +252,17 @@ Cube::BuildPairwiseVertices::CombineVertices(
     }
     dof = dof - 1.0;
     vtx->SetNDOF(dof);
-    double variance = (var1 + var2) / dof;
-    vtx->GetState()->SetPositionVariance(variance,variance,variance,10.0);
+
+    if (dof < 1) return Cube::Handle<Cube::ReconVertex>();
+
+    Cube::VertexFit vtxFit;
+    vtx = vtxFit(vtx);
+
+    if (!vtx) return Cube::Handle<Cube::ReconVertex>();
+    // Protect against crazy vertices
+    if (vtx->GetPositionVariance().Vect().Mag() > fMaxApproach*fMaxApproach) {
+        return Cube::Handle<Cube::ReconVertex>();
+    }
 
     return vtx;
 }
@@ -296,7 +292,7 @@ Cube::BuildPairwiseVertices::MakePairVertex(
                                track1->GetFront()->GetDirection(),
                                track2->GetFront()->GetPosition().Vect(),
                                track2->GetFront()->GetDirection());
-    if (t1 < fOverlapCut && t2 < fOverlapCut) {
+    if (t1 < fMaxOverlap && t2 < fMaxOverlap) {
         if (b < bestApproach) {
             bestApproach = b;
             bestDist1 = t1;
@@ -321,7 +317,7 @@ Cube::BuildPairwiseVertices::MakePairVertex(
                         track1->GetFront()->GetDirection(),
                         track2->GetBack()->GetPosition().Vect(),
                         track2->GetBack()->GetDirection());
-    if (t1 < fOverlapCut && t2 > - fOverlapCut) {
+    if (t1 < fMaxOverlap && t2 > - fMaxOverlap) {
         if (b < bestApproach) {
             bestApproach = b;
             bestDist1 = t1;
@@ -346,7 +342,7 @@ Cube::BuildPairwiseVertices::MakePairVertex(
                         track1->GetBack()->GetDirection(),
                         track2->GetFront()->GetPosition().Vect(),
                         track2->GetFront()->GetDirection());
-    if (t1 > -fOverlapCut && t2 < fOverlapCut) {
+    if (t1 > -fMaxOverlap && t2 < fMaxOverlap) {
         if (b < bestApproach) {
             bestApproach = b;
             bestDist1 = t1;
@@ -371,7 +367,7 @@ Cube::BuildPairwiseVertices::MakePairVertex(
                         track1->GetBack()->GetDirection(),
                         track2->GetBack()->GetPosition().Vect(),
                         track2->GetBack()->GetDirection());
-    if (t1 > -fOverlapCut && t2 > -fOverlapCut) {
+    if (t1 > -fMaxOverlap && t2 > -fMaxOverlap) {
         if (b < bestApproach) {
             bestApproach = b;
             bestDist1 = t1;
@@ -385,8 +381,17 @@ Cube::BuildPairwiseVertices::MakePairVertex(
 
     // Check if this is a decent vertex pair.
     if (bestApproach > fMaxApproach) return Cube::Handle<Cube::ReconVertex>();
+    if (std::abs(bestDist1) > fMaxDistance) {
+        return Cube::Handle<Cube::ReconVertex>();
+    }
+    if (std::abs(bestDist2) > fMaxDistance) {
+        return Cube::Handle<Cube::ReconVertex>();
+    }
 
-    double t1Var = 0.0;
+    double t1Len = TrackLength(track1);
+    // Add Uncertainty for the discreetness of the cubes.
+    double t1Var = 10*unit::mm/t1Len;  //Temp: Min dir sigma (1 cube/length).
+    t1Var = bestDist1*bestDist1*t1Var*t1Var + 100.0*unit::mm*unit::mm/12.0;
     TVector3 t1DirVar = track1->GetState()->GetDirectionVariance();
     t1Var += track1->GetPositionVariance().X()/3.0;
     t1Var += track1->GetPositionVariance().Y()/3.0;
@@ -395,7 +400,10 @@ Cube::BuildPairwiseVertices::MakePairVertex(
     t1Var += bestDist1*bestDist1*t1DirVar.Y();
     t1Var += bestDist1*bestDist1*t1DirVar.Z();
 
-    double t2Var = 0.0;
+    double t2Len = TrackLength(track2);
+    // Add Uncertainty for the discreetness of the cubes.
+    double t2Var = 10*unit::mm/t2Len;  //Temp: Min dir sigma (1 cube/length).
+    t2Var = bestDist2*bestDist2*t2Var*t2Var + 100.0*unit::mm*unit::mm/12.0;
     TVector3 t2DirVar = track2->GetState()->GetDirectionVariance();
     t2Var += track2->GetPositionVariance().X()/3.0;
     t2Var += track2->GetPositionVariance().Y()/3.0;
@@ -403,7 +411,6 @@ Cube::BuildPairwiseVertices::MakePairVertex(
     t2Var += bestDist2*bestDist2*t2DirVar.X();
     t2Var += bestDist2*bestDist2*t2DirVar.Y();
     t2Var += bestDist2*bestDist2*t2DirVar.Z();
-
 
     TLorentzVector bestVertex = PairVertex(bestPos1,bestDir1,t1Var,
                                            bestPos2,bestDir2,t2Var);
@@ -416,19 +423,18 @@ Cube::BuildPairwiseVertices::MakePairVertex(
     vtx->SetQuality(1.0);
 
     vtx->GetState()->SetPosition(bestVertex);
-    double variance = bestApproach*bestApproach/2.0;
-    variance += t1Var;
-    variance += t2Var;
-    // Account for the cube size.  The track position variances are almost
-    // always underestimated since they don't (can't) take into account the
-    // discreet cube spacing.
-    variance += fMinVariance;
-    vtx->GetState()->SetPositionVariance(variance,
-                                         variance,
-                                         variance,
-                                         10.0);
+    vtx->GetState()->SetPositionVariance(10.0,10.0,10.0,10.0);
+
     vtx->AddConstituent(track1);
     vtx->AddConstituent(track2);
+
+    Cube::VertexFit vtxFit;
+    vtx = vtxFit(vtx);
+
+    if (!vtx) return Cube::Handle<Cube::ReconVertex>();
+    if (vtx->GetPositionVariance().Vect().Mag() > fMaxApproach*fMaxApproach) {
+        return Cube::Handle<Cube::ReconVertex>();
+    }
 
     return vtx;
 }
