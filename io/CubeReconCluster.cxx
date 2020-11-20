@@ -195,7 +195,6 @@ void Cube::ReconCluster::UpdateFromHits() {
         }
     }
 
-    stateNorms(eDep) = 1.0;
     for (int i=0; i<dim; ++i) {
         if (stateNorms(i) > 0) stateValues(i) /= stateNorms(i);
     }
@@ -204,6 +203,8 @@ void Cube::ReconCluster::UpdateFromHits() {
     TMatrixTSym<double> stateCov(dim);
     // This counts the weight for each bin of the covariance.
     TMatrixTSym<double> weights(dim);
+    // This counts the weight squared for each bin of the covariance.
+    TMatrixTSym<double> weights2(dim);
     // This counts the number of degrees of freedom contributing to each bin.
     TMatrixTSym<double> dof(dim);
     for (Cube::HitSelection::const_iterator h = beg;
@@ -211,33 +212,25 @@ void Cube::ReconCluster::UpdateFromHits() {
          ++h) {
         vals(eDep) = (*h)->GetCharge() - stateValues(eDep);
         sigs(eDep) = std::sqrt((*h)->GetCharge());
-        rms(eDep) = 0.0;
 
         vals(posX) = (*h)->GetPosition().X() - stateValues(posX);
         sigs(posX) = (*h)->GetUncertainty().X();
-        rms(posX) = (*h)->GetSize().X();
 
         vals(posY) = (*h)->GetPosition().Y() - stateValues(posY);
         sigs(posY) = (*h)->GetUncertainty().Y();
-        rms(posY) = (*h)->GetSize().Y();
 
         vals(posZ) = (*h)->GetPosition().Z() - stateValues(posZ);
         sigs(posZ) = (*h)->GetUncertainty().Z();
-        rms(posZ) = (*h)->GetSize().Z();
 
         vals(posT) = (*h)->GetTime() - stateValues(posT);
         sigs(posT) = (*h)->GetTimeUncertainty();
-        rms(posT) = (*h)->GetTimeUncertainty();
 
         for (int row = 0; row<dim; ++row) {
             for (int col = row; col<dim; ++col) {
                 double weight = 1.0/(sigs(row)*sigs(col));
-                stateCov(row,col) += weight*vals(row)*vals(col);
-                weights(row,col) += weight;
-                double degrees
-                    = 4*rms(row)*rms(col)/(12*sigs(row)*sigs(col));
-                if (row == posT && col == posT) degrees = 1.0;
-                dof(row,col) += degrees;
+                stateCov(row, col) += weight * vals(row) * vals(col);
+                weights(row, col) += weight;
+                weights2(row, col) += std::pow(weight, 2);
             }
         }
     }
@@ -245,43 +238,14 @@ void Cube::ReconCluster::UpdateFromHits() {
     // Turn the "stateCov" variable into the RMS.
     for (int row = 0; row<dim; ++row) {
         for (int col = row; col<dim; ++col) {
-            if (weights(row,col)>0) stateCov(row,col) /= weights(row,col);
-            else stateCov(row,col) = 0.0;
-            stateCov(col,row) = stateCov(row,col);
+            if (row == eDep || col == eDep) {
+                stateCov(row, col) = 0.;
+            } else {
+                stateCov(row, col) *= weights(row, col) / (std::pow(weights(row, col), 2) - weights2(row, col));
+            }
+            if (col != row)
+                stateCov(col, row) = stateCov(row, col);
         }
-    }
-
-    // Turn the RMS into a covariance of the mean (This is almost a repeat of
-    // turning the value into an RMS.
-    for (int row = 0; row<dim; ++row) {
-        for (int col = row; col<dim; ++col) {
-            if (dof(row,col)>0.9) stateCov(row,col) /= std::sqrt(dof(row,col));
-            else if (row==col) stateCov(row,col) = Cube::CorrValues::kFreeValue;
-            else stateCov(row,col) = 0.0;
-            stateCov(col,row) = stateCov(row,col);
-        }
-    }
-
-    // Add the correction for finite size of the hits.
-    TVectorT<double> hitWeights(dim);
-    for (Cube::HitSelection::const_iterator h = beg;
-         h != end;
-         ++h) {
-        sigs(eDep) = std::sqrt((*h)->GetCharge());
-        sigs(posX) = (*h)->GetUncertainty().X();
-        sigs(posY) = (*h)->GetUncertainty().Y();
-        sigs(posZ) = (*h)->GetUncertainty().Z();
-        sigs(posT) = (*h)->GetTimeUncertainty();
-
-        for (int idx = 0; idx<dim; ++idx) {
-            double weight = 1.0/(sigs(idx)*sigs(idx));
-            hitWeights(idx) += weight;
-        }
-    }
-
-    for (int idx = 0; idx<dim; ++idx) {
-        if (hitWeights(idx)<1E-8) continue;
-        stateCov(idx,idx) += 1.0/hitWeights(idx);
     }
 
     // Fix the variance of the deposited energy.  This assumes it's Poisson
